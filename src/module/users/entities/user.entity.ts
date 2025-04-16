@@ -1,0 +1,31 @@
+import { role } from "src/common/enums/role.enum";
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn, } from "typeorm";
+
+@Entity('users')
+export class UserEntity {
+  @PrimaryGeneratedColumn("increment")
+  id: number;
+  @Column()
+  first_name: string;
+  @Column()
+  last_name: string;
+  @Column({ unique: true })
+  mobile: string;
+  @Column({ unique: true })
+  email: string;
+  @Column()
+  password: string;
+  @Column({ default: false })
+  mobile_verify: boolean;
+  @Column({ default: role.USER })
+  role: string;
+  @Column()
+  created_at: string;
+  @UpdateDateColumn()
+  updated_at: Date;
+  @Column({ nullable: true })
+  otp: string;
+  @Column({ nullable: true })
+  expires_in: Date;
+}
+ 
