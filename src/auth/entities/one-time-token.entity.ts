@@ -8,8 +8,8 @@ export class OneTimeToken {
   userId: number;
   @Column({ default: false })
   used: boolean;
-  @CreateDateColumn()
-  createdAt: Date;
   @Column()
   expiresAt: Date;
+  @CreateDateColumn()
+  createdAt: Date;
 }
