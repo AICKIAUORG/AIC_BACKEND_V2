@@ -21,11 +21,6 @@ export class AuthService {
     private tokenRepository: Repository<OneTimeToken>,
     private jwtService: JwtService
   ) {}
-  private createOtp() {
-    let code = randomInt(10000, 99999).toString();
-    let expiration = new Date(new Date().getTime() + 1000 * 60 * 2);
-    return { code, expiration };
-  }
   async signup(mobile : string, OtpDto: CreateOtpDto) {
     const { first_name, last_name, password, email, otp } = OtpDto;
     const { phoneNumber } = mobileValidation(mobile);
@@ -48,6 +43,11 @@ export class AuthService {
       refreshToken,
       statusCode: 201
     };
+  }
+  private createOtp() {
+    let code = randomInt(10000, 99999).toString();
+    let expiration = new Date(new Date().getTime() + 1000 * 60 * 2);
+    return { code, expiration };
   }
 
   async sendOtp(OtpDto: SendOtpDto) {
