@@ -4,7 +4,7 @@ export class TypeOrmConfig implements TypeOrmOptionsFactory{
     createTypeOrmOptions(connectionName?: string): Promise<TypeOrmModuleOptions> | TypeOrmModuleOptions {
     const { DB_HOST,DB_NAME,DB_PASSWORD,DB_PORT,DB_USERNAME } = process.env
     return {
-        type: "mysql",
+        type: "postgres",
         host : DB_HOST,
         port : DB_PORT,
         database : DB_NAME,
