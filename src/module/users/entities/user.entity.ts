@@ -1,5 +1,6 @@
 import { role } from "src/common/enums/role.enum";
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn, } from "typeorm";
+import { MemberEntity } from "src/module/members/entities/members.entity";
+import { Column, CreateDateColumn, Entity, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn, } from "typeorm";
 
 @Entity('users')
 export class UserEntity {
@@ -17,11 +18,11 @@ export class UserEntity {
   password: string;
   @Column({ default: false })
   mobile_verify: boolean;
-  @Column({ default: role.USER })
-  role: string;
-  @Column()
+  @OneToOne(() => MemberEntity, (member) => member.user, {nullable : true, onDelete : "SET NULL"})
+  membership: MemberEntity;
+  @CreateDateColumn({type : "time with time zone"})
   created_at: string;
-  @UpdateDateColumn()
+  @UpdateDateColumn({type : "time with time zone"})
   updated_at: Date;
   @Column({ nullable: true })
   otp: string;
