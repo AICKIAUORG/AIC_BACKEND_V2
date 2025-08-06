@@ -6,6 +6,8 @@ import { TypeOrmConfig } from 'src/config/typeorm.config';
 import { MorganInterceptor, MorganModule } from 'nest-morgan';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthModule } from 'src/auth/auth.module';
+import { MembersModule } from '../members/members.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -18,7 +20,9 @@ import { AuthModule } from 'src/auth/auth.module';
     inject : [TypeOrmConfig]
   }),
   MorganModule,
-  AuthModule
+  AuthModule,
+  MembersModule,
+  UsersModule,
 ],
   controllers: [],
   providers: [
