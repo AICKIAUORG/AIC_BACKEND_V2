@@ -18,8 +18,8 @@ export class AdminEntity {
     @OneToMany(() => PermissionEntity, (permission) => permission.admin, {nullable: true, onDelete: "SET NULL"})
     @JoinColumn({name: "permission_id"})
     permissions: PermissionEntity[];
-    @CreateDateColumn({type : "time with time zone"})
+    @CreateDateColumn({type : "timestamptz"})
     created_at: string;
-    @UpdateDateColumn({type : "time with time zone"})
+    @UpdateDateColumn({type : "timestamptz"})
     updated_at: Date;
 }
