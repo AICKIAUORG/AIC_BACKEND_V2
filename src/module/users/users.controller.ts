@@ -16,7 +16,7 @@ import { AuthGuard } from "src/auth/guard/auth.guard";
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Roles([role.ADMIN]) 
+  // @Roles([role.ADMIN]) 
   @Get()
   @ApiOperation({
     summary: "search users",

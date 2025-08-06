@@ -7,7 +7,7 @@ import { mobileValidation } from "src/common/utility/mobile.utils";
 import * as moment from "moment-jalaali";
 import { isDate } from "class-validator";
 import { PaginationDto } from "src/common/dto/pagination.dto";
-import { pagination, PaginationGenerator, } from "src/common/utility/function.utils";
+import { PaginationGenerator, paginationSolver, } from "src/common/utility/function.utils";
 
 @Injectable()
 export class UsersService {
@@ -17,11 +17,22 @@ export class UsersService {
   ) {}
   
   async findUsers(paginationDto: PaginationDto, searchDto: UserSearchDto) {
-    const { search, mobile, from_date, to_date } = searchDto;
-    const { page, limit, skip } = pagination(paginationDto);
+    const { search, mobile, from_date, to_date, membership } = searchDto;
+    const { page, limit, skip } = paginationSolver(paginationDto);
     const query = this.userRepository.createQueryBuilder("users");
+    query.leftJoinAndSelect("users.membership", "membership");
+
     if (mobile) {
       query.andWhere("users.mobile = :mobile", { mobile });
+    }
+    if (membership !== undefined) {
+      if (membership) {
+        console.log(membership);
+        query.andWhere("users.membership_id IS NOT NULL");
+      } else {
+        console.log("object");
+        query.andWhere("users.membership_id IS NULL");
+      }
     }
     if (
       to_date &&

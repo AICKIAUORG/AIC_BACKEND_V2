@@ -1,10 +1,20 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsMobilePhone, IsOptional, IsString, Matches } from "class-validator";
+import { IsMobilePhone, IsOptional, IsString, Matches, IsBoolean } from "class-validator";
 
 export class UserSearchDto {
   @ApiPropertyOptional({ description: "At least 3 characters are required" })
   search: string;
+  @ApiPropertyOptional({ type : "boolean" })
+  @IsOptional()
+  @IsBoolean({ message: "membership باید boolean باشد" })
+  @Transform(({ value }) => {
+    if (value === 'true' || value === true || value === 1) return true;
+    if (value === 'false' || value === false || value === 0) return false;
+    if (value === '' || value === null || value === undefined) return undefined;
+    return undefined;
+  })
+  membership: boolean;
   @ApiPropertyOptional({ example: "09100000000" })
   @IsOptional()
   @IsMobilePhone("fa-IR", {}, { message: "شماره تلفن نادرست میباشد." })

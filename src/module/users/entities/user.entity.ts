@@ -1,6 +1,6 @@
 import { role } from "src/common/enums/role.enum";
 import { MemberEntity } from "src/module/members/entities/members.entity";
-import { Column, CreateDateColumn, Entity, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn, } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn, } from "typeorm";
 
 @Entity('users')
 export class UserEntity {
@@ -14,15 +14,18 @@ export class UserEntity {
   mobile: string;
   @Column({ unique: true })
   email: string;
+  @Column({ nullable: true })
+  membership_id: number;
   @Column()
   password: string;
   @Column({ default: false })
   mobile_verify: boolean;
   @OneToOne(() => MemberEntity, (member) => member.user, {nullable : true, onDelete : "SET NULL"})
+  @JoinColumn({name : "membership_id"})
   membership: MemberEntity;
-  @CreateDateColumn({type : "time with time zone"})
+  @CreateDateColumn({type : "timestamptz"})
   created_at: string;
-  @UpdateDateColumn({type : "time with time zone"})
+  @UpdateDateColumn({type : "timestamptz"})
   updated_at: Date;
   @Column({ nullable: true })
   otp: string;

@@ -6,11 +6,13 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { AuthGuard } from "src/auth/guard/auth.guard";
 import { AuthService } from "src/auth/auth.service";
 import { JwtService } from "@nestjs/jwt";
+import { OneTimeToken } from "src/auth/entities/one-time-token.entity";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       UserEntity,
+      OneTimeToken
     ]),
   ],
   controllers: [UsersController],
