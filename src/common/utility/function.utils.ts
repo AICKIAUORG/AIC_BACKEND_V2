@@ -12,7 +12,7 @@ export function toMG(value : number){
     return (value * 1024 * 1024)
 }
 
-export function pagination(paginationDto : PaginationDto){
+export function paginationSolver(paginationDto : PaginationDto){
     let { limit, page } = paginationDto
     if(!limit || limit < 10 ) limit = 10
     else if(limit > 100) limit = 100
@@ -30,8 +30,8 @@ export function PaginationGenerator(
     count : number,
 ){
     return {
-        total_count : count,
-        page,
+        total_count : Math.ceil(count / limit),
+        page : page + 1,
         limit,
         skip : page * limit,
     }

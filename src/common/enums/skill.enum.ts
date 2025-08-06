@@ -184,7 +184,7 @@ export enum skillEnum {
     Maven = 'Maven',
     Gradle = 'Gradle',
     Webpack = 'Webpack',
-    ViteTool = 'Vite',
+    ViteTool = 'Vite Tool',
     Babel = 'Babel',
   }
   
