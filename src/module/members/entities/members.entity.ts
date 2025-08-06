@@ -10,11 +10,11 @@ export class MemberEntity {
     id: number;
     @Column()
     user_id
-    @Column()
+    @Column({nullable : true})
     role_id: number;
-    @Column()
+    @Column({nullable : true})
     document_id: number;
-    @Column()
+    @Column({nullable : true})
     department_id: number;
     @OneToOne(() => UserEntity, (user) => user.membership, {onDelete: "CASCADE"})
     @JoinColumn({name: "user_id"})
@@ -28,8 +28,8 @@ export class MemberEntity {
     @ManyToOne(() => DepartmentEntity, (department) => department.members, {nullable: true, onDelete: "SET NULL"})
     @JoinColumn({name: "department_id"})
     department: DepartmentEntity;
-    @CreateDateColumn({type : "time with time zone"})
+    @CreateDateColumn({type : "timestamptz"})
     created_at: string;
-    @UpdateDateColumn({type : "time with time zone"})
+    @UpdateDateColumn({type : "timestamptz"})
     updated_at: Date;
 }
