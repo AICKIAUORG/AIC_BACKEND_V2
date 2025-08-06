@@ -20,8 +20,8 @@ export class DepartmentEntity {
     @ManyToOne(() => CommissionEntity, (commission) => commission.departments)
     @JoinColumn({name : "commission_id"})
     commission : CommissionEntity
-    @CreateDateColumn({type : "time with time zone"})
+    @CreateDateColumn({type : "timestamptz"})
     created_at: string;
-    @UpdateDateColumn({type : "time with time zone"})
+    @UpdateDateColumn({type : "timestamptz"})
     updated_at: Date;
 }

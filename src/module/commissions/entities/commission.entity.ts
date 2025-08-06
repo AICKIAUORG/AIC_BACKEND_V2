@@ -18,8 +18,8 @@ export class CommissionEntity {
     @OneToMany(() => DepartmentEntity, (department) => department.commission, {nullable : true, onDelete : "SET NULL"})
     @JoinColumn({name : "department_id"})
     departments : DepartmentEntity[]
-    @CreateDateColumn({type : "time with time zone"})
+    @CreateDateColumn({type : "timestamptz"})
     created_at: string;
-    @UpdateDateColumn({type : "time with time zone"})
+    @UpdateDateColumn({type : "timestamptz"})
     updated_at: Date;
 }
