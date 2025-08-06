@@ -22,9 +22,9 @@ export class AuthGuard implements CanActivate {
       const token = this.extractToken(request);
       request.user = await this.authService.validateAccessToken(token);
       const userRole = await this.authService.checkUserRole(request);
-      if (requiredRole.includes(userRole.toString())) {
-        return true;
-      }
+      // if (requiredRole.includes(userRole.toString())) {
+      //   return true;
+      // }
       throw new UnauthorizedException("دسترسی شما به این بخش محدود میباشد.");
     }
     return true;

@@ -215,10 +215,10 @@ export class AuthService {
   }
 
   async checkUserRole(request : Request) {
-    const { mobile } = request.user
-    const user = await this.userRepository.findOneBy({ mobile });
-    if (!user) return new UnauthorizedException("کاربر یافت نشد");
-    return user.role;
+    // const { mobile } = request.user
+    // const user = await this.userRepository.findOneBy({ mobile });
+    // if (!user) return new UnauthorizedException("کاربر یافت نشد");
+    // return user.role;
   }
 
   verifyRefreshToken(refreshToken: RefreshTokenDto) {
