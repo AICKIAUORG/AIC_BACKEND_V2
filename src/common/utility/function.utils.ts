@@ -1,4 +1,5 @@
 import { PaginationDto } from "../dto/pagination.dto"
+import * as moment from 'moment-jalaali';
 
 export function isBoolean(value : any){
     return [true , "true", "True", false , "false", "False"].includes(value)
@@ -36,3 +37,11 @@ export function PaginationGenerator(
         skip : page * limit,
     }
 }
+export function DateConvertor(date : string){
+      const m = moment(date, 'jYYYY/jMM/jDD HH:mm')
+      if(!m.isValid()){
+        throw new Error('تاریخ شمسی نامعتبر است');
+    }
+    return m.format('YYYY/MM/DD HH:mm')
+}
+console.log(moment().format('jYYYY/jMM/jDD'));
