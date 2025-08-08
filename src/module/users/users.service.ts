@@ -1,14 +1,11 @@
 import { BadRequestException, ConflictException, ForbiddenException, Injectable, NotFoundException, } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UserEntity } from "./entities/user.entity";
-import { Between, FindOptionsWhere, ILike, LessThanOrEqual, MoreThanOrEqual, Repository, } from "typeorm";
+import { Repository, } from "typeorm";
 import { UpdateUserDto, UserSearchDto } from "./dto/user.dto";
 import { mobileValidation } from "src/common/utility/mobile.utils";
-import * as moment from "moment-jalaali";
-import { isDate } from "class-validator";
 import { PaginationDto } from "src/common/dto/pagination.dto";
-import { PaginationGenerator, paginationSolver, } from "src/common/utility/function.utils";
-
+import { DateConvertor, PaginationGenerator, paginationSolver, } from "src/common/utility/function.utils";
 @Injectable()
 export class UsersService {
   constructor(
@@ -36,18 +33,16 @@ export class UsersService {
     }
     if (
       to_date &&
-      from_date &&
-      isDate(new Date(from_date)) &&
-      isDate(new Date(to_date))
+      from_date
     ) {
-      let from = new Date(new Date(from_date).setUTCHours(0, 0, 0));
-      let to = new Date(new Date(to_date).setUTCHours(0, 0, 0));
+      const to = new Date(DateConvertor(to_date))
+      const from = new Date(DateConvertor(from_date))
       query.andWhere("users.created_at BETWEEN :from AND :to", { from, to });
-    } else if (from_date && isDate(new Date(from_date))) {
-      let from = new Date(new Date(from_date).setUTCHours(0, 0, 0));
+    } else if (from_date) {
+      const from = new Date(DateConvertor(from_date))
       query.andWhere("users.created_at >= :from", { from });
-    } else if (to_date && isDate(new Date(to_date))) {
-      let to = new Date(new Date(to_date).setUTCHours(0, 0, 0));
+    } else if (to_date) {
+      const to = new Date(DateConvertor(to_date))
       query.andWhere("users.created_at <= :to", { to });
     }
     if (search && search.length >= 3) {

@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
 import { IsMobilePhone, IsOptional, IsString, Matches, IsBoolean } from "class-validator";
+import { IsJalaliDateTime } from "src/common/decorators/date.decorator";
 
 export class UserSearchDto {
   @ApiPropertyOptional({ description: "At least 3 characters are required" })
@@ -19,10 +20,14 @@ export class UserSearchDto {
   @IsOptional()
   @IsMobilePhone("fa-IR", {}, { message: "شماره تلفن نادرست میباشد." })
   mobile: string;
-  @ApiPropertyOptional({ description: "in 2025-01-28 18:11:42.000000 format" })
-  to_date: string;
-  @ApiPropertyOptional({ description: "in 2025-01-28 18:11:42.000000 format" })
+  @ApiPropertyOptional({ description: "in 1404/03/26 HH:MM format" })
+  @IsOptional()
+  @IsJalaliDateTime({ message : "تاریخ وارد شده معتبر نیست" })
   from_date: string;
+  @ApiPropertyOptional({ description:"in 1404/03/26 HH:MM format" })
+  @IsOptional()
+  @IsJalaliDateTime({ message : "تاریخ وارد شده معتبر نیست" })
+  to_date: string;
 }
 
 export class FindUserDto {
