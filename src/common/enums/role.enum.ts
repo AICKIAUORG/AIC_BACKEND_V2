@@ -4,12 +4,12 @@ export enum role {
     DOCTOR = "doctor"
 }
 export enum accessEnum {
-    USER = "user",
-    ADMIN = "admin",
-    DOCTOR = "doctor"
+    Create = "create",
+    Update = "update",
+    Delete = "delete"
 }
 export enum permissionEnum {
-    USER = "user",
-    ADMIN = "admin",
+    Publication = "publication",
+    Reports = "reports",
     DOCTOR = "doctor"
 }

@@ -1,16 +1,16 @@
 import { MemberEntity } from "src/module/members/entities/members.entity";
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn, OneToMany, CreateDateColumn, UpdateDateColumn, PrimaryColumn } from "typeorm";
 import { PermissionEntity } from "./permission.entity";
 
 @Entity("admins")
 export class AdminEntity {
-    @PrimaryGeneratedColumn()
-    id: number;
+    @PrimaryColumn("numeric")
+    code: number;
     @Column()
     role : string;
     @Column()
     member_id : number
-    @Column()
+    @Column({nullable : true})
     permission_id : number
     @OneToOne(() => MemberEntity, (member) => member.role, {nullable: true, onDelete: "SET NULL"})
     @JoinColumn({name: "member_id"})

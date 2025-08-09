@@ -37,11 +37,17 @@ export function PaginationGenerator(
         skip : page * limit,
     }
 }
-export function DateConvertor(date : string){
-      const m = moment(date, 'jYYYY/jMM/jDD HH:mm')
-      if(!m.isValid()){
-        throw new Error('تاریخ شمسی نامعتبر است');
+export function DateConvertor(date : string, jalaali : Boolean = true){
+    if(jalaali){
+        const m = moment(date, 'jYYYY/jMM/jDD HH:mm')
+        if(!m.isValid()){
+          throw new Error('تاریخ شمسی نامعتبر است');
+      }
+      return m.format('YYYY/MM/DD HH:mm')
     }
-    return m.format('YYYY/MM/DD HH:mm')
+    const m = moment(date, 'YYYY/MM/DD HH:mm')
+    if(!m.isValid()){
+      throw new Error('تاریخ میلادی نامعتبر است');
+  }
+  return m.format('jYYYY/jMM/jDD HH:mm')
 }
-console.log(moment().format('jYYYY/jMM/jDD'));
