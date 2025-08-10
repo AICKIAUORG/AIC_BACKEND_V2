@@ -4,9 +4,8 @@ export enum StatusEnum {
     reject = "Rejected",
   }
 
-  export enum LogLevel {
-    INFO = 'INFO',
-    WARN = 'WARN',
-    ERROR = 'ERROR',
-    DEBUG = 'DEBUG',
+  export enum ActionEnum {
+    Create = 'Create',
+    Update = 'Update',
+    Delete = 'Delete',
   }
