@@ -10,16 +10,13 @@ export class CommissionEntity {
     name : string
     @Column()
     head_id : number
-    @Column()
-    department_id : number
     @OneToOne(() => MemberEntity, {nullable : true})
     @JoinColumn({name : "head_id"})
     head : MemberEntity
-    @OneToMany(() => DepartmentEntity, (department) => department.commission, {nullable : true, onDelete : "SET NULL"})
-    @JoinColumn({name : "department_id"})
+    @OneToMany(() => DepartmentEntity, (department) => department.commission, {nullable : true})
     departments : DepartmentEntity[]
     @CreateDateColumn({type : "timestamptz"})
-    created_at: string;
+    created_at: Date;
     @UpdateDateColumn({type : "timestamptz"})
     updated_at: Date;
 }
