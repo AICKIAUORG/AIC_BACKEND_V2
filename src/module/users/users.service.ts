@@ -24,11 +24,9 @@ export class UsersService {
     }
     if (membership !== undefined) {
       if (membership) {
-        console.log(membership);
-        query.andWhere("users.membership_id IS NOT NULL");
+        query.andWhere("membership IS NOT NULL");
       } else {
-        console.log("object");
-        query.andWhere("users.membership_id IS NULL");
+        query.andWhere("membership IS NULL");
       }
     }
     if (

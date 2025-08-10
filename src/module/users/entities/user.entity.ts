@@ -14,22 +14,19 @@ export class UserEntity {
   mobile: string;
   @Column({ unique: true })
   email: string;
-  @Column({ nullable: true })
-  membership_id: number;
   @Column()
   password: string;
   @Column({ default: false })
   mobile_verify: boolean;
   @OneToOne(() => MemberEntity, (member) => member.user, {nullable : true, onDelete : "SET NULL"})
-  @JoinColumn({name : "membership_id"})
   membership: MemberEntity;
-  @CreateDateColumn({type : "timestamptz"})
-  created_at: string;
-  @UpdateDateColumn({type : "timestamptz"})
-  updated_at: Date;
   @Column({ nullable: true })
   otp: string;
   @Column({ nullable: true })
   expires_in: Date;
+  @CreateDateColumn({type : "timestamptz"})
+  created_at: string;
+  @UpdateDateColumn({type : "timestamptz"})
+  updated_at: Date;
 }
  

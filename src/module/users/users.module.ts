@@ -7,12 +7,17 @@ import { AuthGuard } from "src/auth/guard/auth.guard";
 import { AuthService } from "src/auth/auth.service";
 import { JwtService } from "@nestjs/jwt";
 import { OneTimeToken } from "src/auth/entities/one-time-token.entity";
+import { AdminService } from "src/admin/admin.service";
+import { AdminEntity } from "src/admin/entities/admin.entity";
+import { PermissionEntity } from "src/admin/entities/permission.entity";
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       UserEntity,
-      OneTimeToken
+      OneTimeToken,
+      AdminEntity,
+      PermissionEntity
     ]),
   ],
   controllers: [UsersController],
@@ -21,6 +26,7 @@ import { OneTimeToken } from "src/auth/entities/one-time-token.entity";
     AuthGuard,
     AuthService,
     JwtService,
+    AdminService
   ],
   exports: [UsersService],
 })

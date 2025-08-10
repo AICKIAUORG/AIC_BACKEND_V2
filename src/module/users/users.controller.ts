@@ -3,7 +3,7 @@ import { UsersService } from "./users.service";
 import { FindUserDto, UpdateUserDto, UserSearchDto, } from "./dto/user.dto";
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiParam, ApiResponse, ApiTags, } from "@nestjs/swagger";
 import { SwaggerEnums } from "src/common/enums/swagger.enum";
-import { Roles } from "src/common/decorators/roles.decorator";
+import { Access } from "src/common/decorators/roles.decorator";
 import { Pagination } from "src/common/decorators/pagination.decorator";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 import { role } from "src/common/enums/role.enum";
@@ -16,7 +16,7 @@ import { AuthGuard } from "src/auth/guard/auth.guard";
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // @Roles([role.ADMIN]) 
+  @Access([],[111]) 
   @Get()
   @ApiOperation({
     summary: "search users",
@@ -70,7 +70,6 @@ export class UsersController {
     return this.usersService.findUsers(paginationDto, searchDto);
   }
 
-  @Roles([role.ADMIN])
   @Patch("update-user:mobile")
   @ApiOperation({ summary: "update user profile" })
   @ApiResponse({
@@ -82,7 +81,6 @@ export class UsersController {
         first_name: "پویا",
         last_name: "عباداللهی",
         mobile: "09196715197",
-        wallet: 99999,
         mobile_verify: false,
         role: "user",
         created_at: "2025-06-24T13:21:29.000Z",
@@ -97,7 +95,6 @@ export class UsersController {
     return this.usersService.update(userDto.mobile, updateUserDto);
   }
 
-  @Roles([role.ADMIN])
   @Delete(":mobile")
   @ApiOperation({ summary: "delete user information" })
   @ApiResponse({
