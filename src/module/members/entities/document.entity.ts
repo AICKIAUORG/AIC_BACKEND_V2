@@ -3,7 +3,7 @@ import { MemberEntity } from "./members.entity";
 import { skillEnum } from "src/common/enums/skill.enum";
 import { StatusEnum } from "src/common/enums/status.enum";
 
-@Entity("document")
+@Entity("documents")
 export class DocumentEntity {
     @PrimaryGeneratedColumn()
     id : number
@@ -23,9 +23,6 @@ export class DocumentEntity {
     reviewedBy: string
     @Column()
     entry_year: string
-    @Column()
-    member_id: number
-    @OneToOne(() => MemberEntity, (member) => member.department, {onDelete : "CASCADE"})
-    @JoinColumn({name : "member_id"})
+    @OneToOne(() => MemberEntity, (member) => member.document)
     member : MemberEntity; 
 }
