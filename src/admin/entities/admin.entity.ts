@@ -8,18 +8,13 @@ export class AdminEntity {
     code: number;
     @Column()
     role : string;
-    @Column()
-    member_id : number
     @Column({nullable : true})
-    permission_id : number
+    member_id : number
     @OneToOne(() => MemberEntity, (member) => member.role, {nullable: true, onDelete: "SET NULL"})
     @JoinColumn({name: "member_id"})
     member: MemberEntity;
-    @OneToMany(() => PermissionEntity, (permission) => permission.admin, {nullable: true, onDelete: "SET NULL"})
-    @JoinColumn({name: "permission_id"})
-    permissions: PermissionEntity[];
     @CreateDateColumn({type : "timestamptz"})
-    created_at: string;
+    created_at: Date;
     @UpdateDateColumn({type : "timestamptz"})
     updated_at: Date;
 }

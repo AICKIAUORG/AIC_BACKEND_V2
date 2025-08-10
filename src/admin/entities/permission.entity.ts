@@ -1,22 +1,20 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToMany, PrimaryColumn, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { AdminEntity } from "./admin.entity";
 import { accessEnum, permissionEnum } from "src/common/enums/role.enum";
+import { MemberEntity } from "src/module/members/entities/members.entity";
 
 @Entity("permissions")
 export class PermissionEntity {
-    @PrimaryGeneratedColumn()
-    id: number;
-    @Column({enum: permissionEnum})
+    @PrimaryColumn()
+    code: number;
+    @Column({type : "enum", enum: permissionEnum})
     permission : string;
-    @Column()
-    admin_id : number
-    @Column({enum: accessEnum})
+    @Column({type : "enum", enum: accessEnum})
     access : string 
-    @ManyToOne(() => AdminEntity, (admin) => admin.permissions, {onDelete: "CASCADE"})
-    @JoinColumn({name: "admin_id"})
-    admin: AdminEntity;
+    @ManyToMany(() => MemberEntity, (member) => member.permissions)
+    members: MemberEntity[];
     @CreateDateColumn({type : "timestamptz"})
-    created_at: string;
+    created_at: Date;
     @UpdateDateColumn({type : "timestamptz"})
     updated_at: Date;
     
