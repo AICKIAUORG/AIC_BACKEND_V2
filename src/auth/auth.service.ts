@@ -26,16 +26,13 @@ export class AuthService {
     const { phoneNumber } = mobileValidation(mobile);
     await this.checkExist(email, phoneNumber)
     const { accessToken, refreshToken } = await this.checkOtp(phoneNumber, otp)
-    moment.locale('fa');
-    const now = moment().format('jYYYY/jMM/jDD HH:mm:ss')
     const hashedPassword = this.hashPassword(password)
     await this.userRepository.update({ mobile : phoneNumber } ,{
       first_name,
       last_name,
       email,
       mobile: phoneNumber,
-      password : hashedPassword,
-      created_at : now
+      password : hashedPassword
     });
     return {
       message: "کاربر با موفقیت ثبت نام شد.",
@@ -84,7 +81,6 @@ export class AuthService {
         email : "Not Verified",
         mobile: phoneNumber,
         password : "Not Verified",
-        created_at : "Not Verified",
         otp: code,
         expires_in: expiration,
       });
@@ -213,14 +209,7 @@ export class AuthService {
     const salt = genSaltSync(10)
     return hashSync(password , salt)
   }
-
-  async checkUserRole(request : Request) {
-    // const { mobile } = request.user
-    // const user = await this.userRepository.findOneBy({ mobile });
-    // if (!user) return new UnauthorizedException("کاربر یافت نشد");
-    // return user.role;
-  }
-
+  
   verifyRefreshToken(refreshToken: RefreshTokenDto) {
     const { RefreshToken } = refreshToken;
     try {

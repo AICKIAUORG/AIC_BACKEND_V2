@@ -4,9 +4,6 @@ import { CreateOtpDto, LoginDto, RefreshTokenDto, ResetPasswordDto, SendOtpDto }
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { SwaggerEnums } from "src/common/enums/swagger.enum";
 import { AuthGuard } from "./guard/auth.guard";
-import { Roles } from "src/common/decorators/roles.decorator";
-import { role } from "src/common/enums/role.enum";
-
 @Controller("auth")
 @UseGuards(AuthGuard)
 @ApiTags("Auth")

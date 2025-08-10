@@ -3,28 +3,34 @@ import { isJWT } from "class-validator";
 import { Request } from "express";
 import { AuthService } from "../auth.service";
 import { Reflector } from "@nestjs/core";
-import { ROLE_KEY } from "src/common/decorators/roles.decorator";
+import { PERMISSION_KEY, ROLE_KEY } from "src/common/decorators/roles.decorator";
+import { AdminService } from "src/admin/admin.service";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private authService: AuthService,
+    private adminService: AdminService,
     private reflector: Reflector
   ) {}
   async canActivate(context: ExecutionContext) {
-    const requiredRole: string[] = this.reflector.get(
+    const requiredRole: number[] = this.reflector.get(
       ROLE_KEY,
       context.getHandler()
     );
-    if (requiredRole && requiredRole.length > 0) {
+    const requiredPermission: Number[] = this.reflector.get(
+      PERMISSION_KEY,
+      context.getHandler()
+    );
+    if ((requiredRole && requiredRole.length > 0) || (requiredPermission && requiredPermission.length > 0)) {
       const httpRequest = context.switchToHttp();
       const request: Request = httpRequest.getRequest<Request>();
       const token = this.extractToken(request);
       request.user = await this.authService.validateAccessToken(token);
-      const userRole = await this.authService.checkUserRole(request);
-      // if (requiredRole.includes(userRole.toString())) {
-      //   return true;
-      // }
+      const access = await this.adminService.checkAccess(request.user.id, requiredRole, requiredPermission);
+      if (access) {
+        return true;
+      }
       throw new UnauthorizedException("دسترسی شما به این بخش محدود میباشد.");
     }
     return true;
