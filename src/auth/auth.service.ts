@@ -135,7 +135,8 @@ export class AuthService {
     }
     const { accessToken, refreshToken } = this.TokenGenerator({
       id: profile?.id,
-      mobile: profile?.mobile
+      mobile: profile?.mobile,
+      membership : profile?.membership ? true : false
     });
     return {
       accessToken,
@@ -157,7 +158,8 @@ export class AuthService {
       if(compareSync(password, user.password)){
         const { accessToken, refreshToken } = this.TokenGenerator({
           id: user?.id,
-          mobile: user?.mobile
+          mobile: user?.mobile,
+          membership : user?.membership ? true : false
         });
         return {
           message : "کاربر با موفقیت لاگین شد.",
@@ -217,8 +219,8 @@ export class AuthService {
         secret: process.env.REFRESH_TOKEN_SECRET,
       });
       if (verify.mobile) {
-        const { id, mobile } = verify;
-        return this.TokenGenerator({ id, mobile });
+        const { id, mobile, membership } = verify;
+        return this.TokenGenerator({ id, mobile , membership});
       }
       throw new UnauthorizedException("رفرش توکن معبر وارد کنید");
     } catch (error) {
