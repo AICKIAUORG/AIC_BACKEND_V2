@@ -1,28 +1,44 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsArray, IsInt, IsOptional, IsString, Length, Matches, Max, Min } from "class-validator";
+import { IsArray, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Length, Matches, Max, Min } from "class-validator";
 import { skillEnum } from "src/common/enums/skill.enum";
-import { Type } from "class-transformer";
+import { Type, Transform } from "class-transformer";
 
 export class DocumentDto {
     @ApiProperty()
     @Length(10,10,{message : "کد ملی باید 10 رقم باشد"})
     national_code : string
+    
     @ApiProperty()
     @Matches(/^\d{9}$|^\d{14}$/,{ message: "شماره دانشجویی باید 9 یا 14 رقم باشد" })
     student_number : string
-    @ApiPropertyOptional({enum : skillEnum, type : "array", items : {type : "string"}})
+    
+    @ApiPropertyOptional({enum : skillEnum, type : "array",items : {type : "string"}})
     @IsOptional()
-    @IsArray()
-    @IsString({each : true})
+    @Transform(({ value }) => {
+        if (!value) return [];
+        if (typeof value === 'string') {
+            if (value.includes(',')) {
+                return value.split(',').map(skill => skill.trim()).filter(skill => skill);
+            }
+            return [value.trim()];
+        }
+        if (Array.isArray(value)) {
+            return value.map(skill => typeof skill === 'string' ? skill.trim() : skill);
+        }
+        return [];
+    })
+    @IsArray({ message: "skills must be an array" })
+    @IsEnum(skillEnum, { each: true, message: "Invalid skill value" })
     skills : string[]
     @ApiPropertyOptional({format : "binary"})
     @IsOptional()
     @IsString()
     resume : string
     @ApiProperty({format : "binary"})
-    @IsString()
     studentCard_image : string
     @ApiProperty({enum : {Male : "male", Female : "female"}})
+    @IsString()
+    @IsEnum({ Male: "male", Female: "female" }, { message: "مقدار جنسیت صحیح نمیباشد." })
     gender : string
     @ApiPropertyOptional({ minimum: 1350, type: Number })
     @IsOptional()

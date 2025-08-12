@@ -5,9 +5,7 @@ import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiResponse, ApiTags } from "
 import { SwaggerEnums } from "src/common/enums/swagger.enum";
 import { AuthGuard } from "./guard/auth.guard";
 @Controller("auth")
-@UseGuards(AuthGuard)
 @ApiTags("Auth")
-@ApiBearerAuth("Authorization")
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

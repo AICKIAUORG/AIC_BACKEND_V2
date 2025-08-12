@@ -195,9 +195,10 @@ export class AuthService {
       });
       let user: UserEntity;
       if (typeof payload == "object" && payload?.id) {
+        
         user = await this.userRepository.findOneBy({ id: payload.id });
         if (!user) {
-          throw new UnauthorizedException("لطفا وارد اکانت خود شوید.");
+          throw new UnauthorizedException("لطفا وارد اکانت خود شوید.1");
         }
         return payload;
       }

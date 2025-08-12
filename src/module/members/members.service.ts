@@ -23,7 +23,10 @@ export class MembersService {
     ) {}
 
     async submitMember(documentDto : DocumentDto, resume : Express.Multer.File, studentCard_image : Express.Multer.File) {
-        const {national_code, student_number, skills, entry_year, gender, GPA} = documentDto
+        const {skills, national_code, student_number, entry_year, gender, GPA} = documentDto
+        console.log(documentDto, resume, studentCard_image);
+        let resumeLocation : string;
+        let resumeKey : string;
         if(this.req.user.membership) throw new ConflictException('شما قبلا ثبت نام کرده اید')
         await this.checkExist(national_code, student_number)
         const member = this.membersRepository.create({user_id : this.req.user.id})
@@ -36,11 +39,15 @@ export class MembersService {
             gender,
             GPA
         })
-        const {Location : resumeLocation, Key : resumeKey} = await this.s3service.uploadFile(resume,`members/document${this.req.user.id}`)
+        if(resume){
+            const {Location , Key} = await this.s3service.uploadFile(resume,`members/document${this.req.user.id}`)
+            resumeLocation = Location;
+            resumeKey = Key;
+            document.resume = {location : resumeLocation, key : resumeKey}
+        }
         const {Location : cardLocation, Key : cardKey} = await this.s3service.uploadFile(studentCard_image,`members/document${this.req.user.id}`)
-        document.resume = {location : resumeLocation, key : resumeKey}
         document.studentCard_image = {location : cardLocation, key : cardKey}
-        Promise.all([
+        await Promise.all([
             this.membersRepository.save(member),
             this.documentRepository.save(document)
         ])
@@ -62,6 +69,5 @@ export class MembersService {
             const member = await this.membersRepository.findOne({where : {document : {student_number}}})
             if(member) throw new ConflictException('کاربر با این شماره دانشجویی قبلا ثبت نام کرده است')
         }
-        throw new InternalServerErrorException('internal error')
     }
 }

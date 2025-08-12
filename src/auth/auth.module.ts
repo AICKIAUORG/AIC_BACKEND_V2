@@ -14,6 +14,6 @@ import { PermissionEntity } from "src/admin/entities/permission.entity";
   imports: [TypeOrmModule.forFeature([UserEntity, OneTimeToken, AdminEntity, PermissionEntity])],
   controllers: [AuthController],
   providers: [AuthService, JwtService, AuthGuard, AdminService],
-  exports: [AuthService, JwtService, TypeOrmModule],
+  exports: [AuthService, JwtService, TypeOrmModule,AuthGuard],
 })
 export class AuthModule {}
