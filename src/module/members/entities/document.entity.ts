@@ -7,22 +7,31 @@ import { StatusEnum } from "src/common/enums/status.enum";
 export class DocumentEntity {
     @PrimaryGeneratedColumn()
     id : number
+    @Column({nullable : true})
+    member_id: number;
     @Column({unique : true})
     national_code: string
     @Column({unique : true})
     student_number: string
     @Column({nullable : true, type : "enum", array : true, enum : skillEnum, enumName: "skill_enum"})
     skills: string[]
-    @Column({nullable : true})
-    resume: string
+    @Column({ nullable: true, type: "jsonb" })
+    resume: { location: string, key: string }
+    @Column({nullable : true, type : 'jsonb'})
+    studentCard_image: { location: string, key: string }
+    @Column({type : "enum", enum : {Male : "male", Female : "female"}})
+    gender: string
     @Column({enum : StatusEnum, type : "enum", default : StatusEnum.pending, enumName: "status_enum"})
     status: string
+    @Column({ type: "decimal", precision: 4, scale: 2})
+    GPA: number
     @Column({nullable : true})
     reason: string
-    @Column()
+    @Column({nullable : true})
     reviewedBy: string
     @Column()
-    entry_year: string
-    @OneToOne(() => MemberEntity, (member) => member.document)
+    entry_year: number
+    @OneToOne(() => MemberEntity, (member) => member.document, {onDelete : 'CASCADE'})
+    @JoinColumn({name: "member_id"})
     member : MemberEntity; 
 }

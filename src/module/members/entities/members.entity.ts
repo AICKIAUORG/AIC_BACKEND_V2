@@ -12,16 +12,13 @@ export class MemberEntity {
     @Column()
     user_id
     @Column({nullable : true})
-    document_id: number;
-    @Column({nullable : true})
     department_id: number;
     @OneToOne(() => UserEntity, (user) => user.membership, {onDelete: "CASCADE"})
     @JoinColumn({name: "user_id"})
     user: UserEntity;
     @OneToOne(() => AdminEntity, (admin) => admin.member, {nullable: true, onDelete: "SET NULL"})
     role: AdminEntity;
-    @OneToOne(() => DocumentEntity, (document) => document.member, {nullable: true, onDelete : "SET NULL"})
-    @JoinColumn({name: "document_id"})
+    @OneToOne(() => DocumentEntity, (document) => document.member)
     document: DocumentEntity;
     @ManyToOne(() => DepartmentEntity, (department) => department.members, {nullable: true, onDelete: "SET NULL"})
     @JoinColumn({name: "department_id"})
