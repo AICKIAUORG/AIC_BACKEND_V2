@@ -18,7 +18,7 @@ export class MemberEntity {
     user: UserEntity;
     @OneToOne(() => AdminEntity, (admin) => admin.member, {nullable: true, onDelete: "SET NULL"})
     role: AdminEntity;
-    @OneToOne(() => DocumentEntity, (document) => document.member)
+    @OneToOne(() => DocumentEntity, (document) => document.member, {onDelete : "CASCADE"})
     document: DocumentEntity;
     @ManyToOne(() => DepartmentEntity, (department) => department.members, {nullable: true, onDelete: "SET NULL"})
     @JoinColumn({name: "department_id"})
