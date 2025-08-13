@@ -53,15 +53,33 @@ export class UsersService {
         "تعداد کاراکتر های سرچ نمیتواند کمتر از ۳ کاراکتر باشد."
       );
     }
+    query.select([
+      "users.id",
+      "users.first_name",
+      "users.last_name", 
+      "users.mobile", 
+      "users.email", 
+      "users.created_at", 
+      "membership.id", 
+  ]);
     query.take(limit);
     query.skip(skip);
     query.orderBy("users.created_at", "DESC");
     const [users, count] = await query.getManyAndCount();
-
+    console.log(users);
     if (users.length == 0) throw new NotFoundException("نتیحه ای یافت نشد.");
+    const simplifiedMembers = users.map(user => ({
+      id: user.id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      mobile : user.mobile,
+      email : user.email,
+      submitted_at : DateConvertor(user.created_at, false),
+      membership : user.membership?.id ? true : false
+  }));
     return {
       pagination: PaginationGenerator(page, limit, count),
-      users,
+      users : simplifiedMembers,
     };
   }
 

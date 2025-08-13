@@ -18,6 +18,8 @@ export class UserEntity {
   password: string;
   @Column({ default: false })
   mobile_verify: boolean;
+  @Column({ default: 0 })
+  token_version: number;
   @OneToOne(() => MemberEntity, (member) => member.user, {nullable : true, onDelete : "SET NULL"})
   membership: MemberEntity;
   @Column({ nullable: true })
