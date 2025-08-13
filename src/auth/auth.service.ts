@@ -136,8 +136,11 @@ export class AuthService {
     const { accessToken, refreshToken } = this.TokenGenerator({
       id: profile?.id,
       mobile: profile?.mobile,
-      membership : profile?.membership ? true : false
+      membership : profile?.membership ? true : false,
+      token_version : profile?.token_version + 1
     });
+    profile.token_version += 1
+    await this.userRepository.save(profile)
     return {
       accessToken,
       refreshToken
@@ -147,6 +150,7 @@ export class AuthService {
   async login(loginDto : LoginDto){
     const { Username, password } = loginDto
     const user = await this.userRepository.findOne({
+      relations : {membership : true},
       where: [
         {
           email : Username
@@ -159,8 +163,11 @@ export class AuthService {
         const { accessToken, refreshToken } = this.TokenGenerator({
           id: user?.id,
           mobile: user?.mobile,
-          membership : user?.membership ? true : false
+          membership : user?.membership ? true : false,
+          token_version : user?.token_version + 1
         });
+        user.token_version += 1
+        await this.userRepository.save(user)
         return {
           message : "کاربر با موفقیت لاگین شد.",
           accessToken,
@@ -198,7 +205,10 @@ export class AuthService {
         
         user = await this.userRepository.findOneBy({ id: payload.id });
         if (!user) {
-          throw new UnauthorizedException("لطفا وارد اکانت خود شوید.1");
+          throw new UnauthorizedException("لطفا وارد اکانت خود شوید.");
+        }
+        if(user.token_version !== payload.token_version){
+          throw new UnauthorizedException("token is not valid");
         }
         return payload;
       }
@@ -213,15 +223,16 @@ export class AuthService {
     return hashSync(password , salt)
   }
   
-  verifyRefreshToken(refreshToken: RefreshTokenDto) {
+  async verifyRefreshToken(refreshToken: RefreshTokenDto) {
     const { RefreshToken } = refreshToken;
     try {
       const verify = this.jwtService.verify<TokenPayload>(RefreshToken, {
         secret: process.env.REFRESH_TOKEN_SECRET,
       });
       if (verify.mobile) {
-        const { id, mobile, membership } = verify;
-        return this.TokenGenerator({ id, mobile , membership});
+        const { id, mobile, membership, token_version } = verify;
+        await this.userRepository.update({id : verify.id}, {token_version : token_version + 1})
+        return this.TokenGenerator({ id, mobile , membership, token_version : token_version + 1});
       }
       throw new UnauthorizedException("رفرش توکن معبر وارد کنید");
     } catch (error) {
