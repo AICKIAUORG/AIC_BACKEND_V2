@@ -1,3 +1,4 @@
+import { BadRequestException } from "@nestjs/common";
 import { PaginationDto } from "../dto/pagination.dto"
 import * as moment from 'moment-jalaali';
 
@@ -41,13 +42,13 @@ export function DateConvertor(date : string, jalaali : Boolean = true){
     if(jalaali){
         const m = moment(date, 'jYYYY/jMM/jDD HH:mm')
         if(!m.isValid()){
-          throw new Error('تاریخ شمسی نامعتبر است');
+          throw new BadRequestException('تاریخ شمسی نامعتبر است');
       }
       return m.format('YYYY/MM/DD HH:mm')
     }
-    const m = moment(date, 'YYYY/MM/DD HH:mm')
+    const m = moment(date)
     if(!m.isValid()){
-      throw new Error('تاریخ میلادی نامعتبر است');
+      throw new BadRequestException('تاریخ میلادی نامعتبر است');
   }
   return m.format('jYYYY/jMM/jDD HH:mm')
 }
