@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Inject, Injectable, InternalSer
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { MemberEntity } from "./entities/members.entity";
-import { DocumentDto, MemberSearchDto } from "./dto/document.dto";
+import { DocumentDto, MemberSearchDto, UpdateMemberDto } from "./dto/document.dto";
 import { REQUEST } from "@nestjs/core";
 import { Request } from "express";
 import { UploadFileS3 } from "src/common/interceptors/upload-file.interceptor";
@@ -25,11 +25,11 @@ export class MembersService {
     ) {}
 
     async submitMember(documentDto : DocumentDto, resume : Express.Multer.File, studentCard_image : Express.Multer.File) {
-        const {skills, national_code, student_number, entry_year, gender, GPA} = documentDto
+        const {skills, national_code, student_number, entry_year, gender, GPA, description} = documentDto
         let resumeLocation : string;
         let resumeKey : string;
         if(this.req.user.membership) throw new ConflictException('شما قبلا ثبت نام کرده اید')
-        await this.checkExist(national_code, student_number)
+        await this.checkDocumentExist(national_code, student_number)
         const member = this.membersRepository.create({user_id : this.req.user.id})
         const {id} = await this.membersRepository.save(member)
         const document = this.documentRepository.create({
@@ -37,6 +37,7 @@ export class MembersService {
             national_code,
             student_number,
             skills,
+            description,
             entry_year,
             gender,
             GPA
@@ -63,16 +64,25 @@ export class MembersService {
         
     }
 
-    async checkExist(national_code? : string, student_number? :string){
+    async checkDocumentExist(national_code? : string, student_number? :string){
         if(national_code){
             const member = await this.documentRepository.findOne({
                 where : {national_code}})
-            if(member) throw new ConflictException('کاربر با این کد ملی قبلا ثبت نام کرده است')
+            
         }
         if(student_number){
             const member = await this.documentRepository.findOne({where : {student_number}})
             if(member) throw new ConflictException('کاربر با این شماره دانشجویی قبلا ثبت نام کرده است')
         }
+    }
+
+    async checkMemberExist(id : number){
+        const member = await this.membersRepository.findOne({
+            where : {id},
+            relations : {document : true}
+        })
+        if(!member) throw new NotFoundException('کاربر یافت نشد')
+        return member
     }
 
     async findMembers(paginationDto: PaginationDto, searchDto: MemberSearchDto) {
@@ -178,4 +188,27 @@ export class MembersService {
           members: simplifiedMembers,
         };
       }
+
+      async update(updateDto : UpdateMemberDto, resume : Express.Multer.File){  
+        const { description, skills } = updateDto;    
+        const member = await this.checkMemberExist(this.req.user.id)
+        if(!member?.document?.id) 
+            throw new NotFoundException('اطلاعات کاربر یافت نشد،')
+        if(description && description.length > 0){
+            member.document.description = description
+        }
+        if(skills && skills.length > 0){
+            member.document.skills = skills
+        }
+        if(resume){
+            const { Key, Location } = await this.s3service.uploadFile(resume, `AIC/members/document${this.req.user.id}`)
+            member.document.resume = {location : Location, key : Key}
+        }
+
+        await this.membersRepository.save(member)
+        return {
+            message : "اطلاعات کاربر با موفقیت اپدیت شد."
+        }
+    }
 }
+

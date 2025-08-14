@@ -26,6 +26,8 @@ export class DocumentEntity {
     @Column({ type: "decimal", precision: 4, scale: 2})
     GPA: number
     @Column({nullable : true})
+    description: string
+    @Column({nullable : true})
     reason: string
     @Column({nullable : true})
     reviewedBy: string

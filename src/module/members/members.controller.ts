@@ -1,15 +1,17 @@
-import { BadRequestException, Body, Controller, FileTypeValidator, Get, MaxFileSizeValidator, ParseFilePipe, Post, Query, UploadedFile, UploadedFiles, UseInterceptors } from "@nestjs/common";
+import { BadRequestException, Body, Controller, FileTypeValidator, Get, MaxFileSizeValidator, ParseFilePipe, Post, Put, Query, UploadedFile, UploadedFiles, UseInterceptors } from "@nestjs/common";
 import { MembersService } from "./members.service";
 import { ApiConsumes, ApiQuery, ApiTags, ApiOperation, ApiBody, ApiResponse } from "@nestjs/swagger";
 import { UserAuth } from "src/common/decorators/auth.decorator";
 import { SwaggerEnums } from "src/common/enums/swagger.enum";
-import { DocumentDto, MemberSearchDto } from "./dto/document.dto";
+import { DocumentDto, MemberSearchDto, UpdateMemberDto } from "./dto/document.dto";
 import * as moment from 'moment-jalaali';
 import { skillEnum } from "src/common/enums/skill.enum";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { memoryStorage } from "multer";
 import { Pagination } from "src/common/decorators/pagination.decorator";
 import { PaginationDto } from "src/common/dto/pagination.dto";
+import { UploadFileS3 } from "src/common/interceptors/upload-file.interceptor";
+import { toMG } from "src/common/utility/function.utils";
 
 @Controller("members")
 @ApiTags("Members")
@@ -120,7 +122,7 @@ export class MembersController {
         ], {
             storage: memoryStorage(),
             limits: {
-                fileSize: 10 * 1024 * 1024, // 10MB limit
+                fileSize: toMG(10)
             },
         })
     )
@@ -134,7 +136,7 @@ export class MembersController {
         }
         if (files.resume && files.resume[0]) {
             const resume = files.resume[0];
-            if (resume.size > 10 * 1024 * 1024) {
+            if (resume.size > toMG(10)) {
                 throw new BadRequestException('Resume file size must be less than 10MB');
             }
             if (!resume.mimetype.includes('pdf')) {
@@ -147,7 +149,7 @@ export class MembersController {
         }
         
         const studentCard = files.studentCard_image[0];
-        if (studentCard.size > 10 * 1024 * 1024) {
+        if (studentCard.size > toMG(10)) {
             throw new BadRequestException('Student card image size must be less than 10MB');
         }
         
@@ -161,5 +163,51 @@ export class MembersController {
             files.resume?.[0], 
             files.studentCard_image[0]
         );
+    }
+
+    @UserAuth()
+    @ApiOperation({ summary: 'Register new member', description: 'Register new member with required file uploads' })
+    @ApiConsumes(SwaggerEnums.Multipart)
+    @ApiResponse({
+        status: 200,
+        description: "When member registration is successful",
+        schema: {
+            example: {
+                "message": "member submitted successfully",
+                "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywibW9iaWxlIjoiMDkxOTY3MTUxOTciLCJtZW1iZXJzaGlwIjp0cnVlLCJ0b2tlbl92ZXJzaW9uIjo1LCJpYXQiOjE3NTUwOTY1NDUsImV4cCI6MTc1NzY4ODU0NX0.Wc_pZG5NSUNRWmus1I9FGd9KCBV9J9kmxafqhzfMOSM",
+                "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywibW9iaWxlIjoiMDkxOTY3MTUxOTciLCJtZW1iZXJzaGlwIjp0cnVlLCJ0b2tlbl92ZXJzaW9uIjo1LCJpYXQiOjE3NTUwOTY1NDUsImV4cCI6MTc4NjY1NDE0NX0.88GYm5YqgqT7e-r1g1S33mc8EV46DZ1EPsO5hywbW6k"
+            },
+        },
+    })
+    @ApiResponse({
+    status: 409,
+    description: "When user has already submitted registration",
+    schema: {
+        example: {
+            "message": "شما قبلا ثبت نام کرده اید",
+            "error": "Conflict",
+            "statusCode": 409
+        },
+    },
+    })
+    @ApiBody({
+        type: DocumentDto,
+        description: 'New member information',
+    })
+    @UseInterceptors(UploadFileS3('resume'))
+    @Put()
+    update(
+        @Body() updateDto: UpdateMemberDto,
+        @UploadedFiles(
+            new ParseFilePipe({
+                validators : [
+                  new MaxFileSizeValidator({maxSize : toMG(10)}),
+                  new FileTypeValidator({fileType : "application/pdf"}),
+                ],
+                fileIsRequired : false,
+              })
+        ) resume : Express.Multer.File
+    ) {
+        return this.membersService.update(updateDto, resume)
     }
 }

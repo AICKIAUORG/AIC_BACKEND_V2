@@ -52,6 +52,9 @@ export class DocumentDto {
     @Min(5, { message: "مقدار معدل صحیح نمیباشد" })
     @Max(20, { message: "مقدار معدل صحیح نمیباشد" })
     GPA: number
+    @ApiPropertyOptional()
+    @IsString()
+    description : string
 }
 
 export class MemberSearchDto {
@@ -161,4 +164,33 @@ export class MemberSearchDto {
     @Min(1, { message: 'Limit must be 1 or greater' })
     @Max(100, { message: 'Limit cannot exceed 100' })
     limit?: number;
+  }
+
+  export class UpdateMemberDto {
+    @ApiPropertyOptional()
+    @IsString()
+    description : string
+    @ApiPropertyOptional({format : "binary"})
+    @IsOptional()
+    @IsString()
+    resume : string
+    @ApiPropertyOptional({enum : skillEnum, type : "array",items : {type : "string"}})
+    @IsOptional()
+    @Transform(({ value }) => {
+        if (!value) return [];
+        if (typeof value === 'string') {
+            if (value.includes(',')) {
+                return value.split(',').map(skill => skill.trim()).filter(skill => skill);
+            }
+            return [value.trim()];
+        }
+        if (Array.isArray(value)) {
+            return value.map(skill => typeof skill === 'string' ? skill.trim() : skill);
+        }
+        return [];
+    })
+    @IsArray({ message: "skills must be an array" })
+    @IsEnum(skillEnum, { each: true, message: "Invalid skill value" })
+    skills : string[]
+
   }
