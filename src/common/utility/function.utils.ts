@@ -38,7 +38,7 @@ export function PaginationGenerator(
         skip : page * limit,
     }
 }
-export function DateConvertor(date : string, jalaali : Boolean = true){
+export function DateConvertor(date : string | Date, jalaali : Boolean = true){
     if(jalaali){
         const m = moment(date, 'jYYYY/jMM/jDD HH:mm')
         if(!m.isValid()){
