@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Inject, Injectable, InternalSer
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { MemberEntity } from "./entities/members.entity";
-import { DocumentDto, MemberSearchDto, UpdateMemberDto } from "./dto/document.dto";
+import { ConfirmDto, DocumentDto, MemberSearchDto, UpdateMemberDto } from "./dto/document.dto";
 import { REQUEST } from "@nestjs/core";
 import { Request } from "express";
 import { UploadFileS3 } from "src/common/interceptors/upload-file.interceptor";
@@ -11,6 +11,7 @@ import { DocumentEntity } from "./entities/document.entity";
 import { AuthService } from "src/auth/auth.service";
 import { PaginationDto } from "src/common/dto/pagination.dto";
 import { paginationSolver, DateConvertor, PaginationGenerator } from "src/common/utility/function.utils";
+import { StatusEnum } from "src/common/enums/status.enum";
 @Injectable({scope : Scope.REQUEST})
 export class MembersService {
     constructor(
@@ -24,7 +25,7 @@ export class MembersService {
         private authService : AuthService
     ) {}
 
-    async submitMember(documentDto : DocumentDto, resume : Express.Multer.File, studentCard_image : Express.Multer.File) {
+    async submitMember(documentDto : DocumentDto, resume : Express.Multer.File | undefined, studentCard_image : Express.Multer.File) {
         const {skills, national_code, student_number, entry_year, gender, GPA, description} = documentDto
         let resumeLocation : string;
         let resumeKey : string;
@@ -64,11 +65,28 @@ export class MembersService {
         
     }
 
+    async findDocById(document_id : number){
+        const document = await this.documentRepository.findOne({
+            where : {id : document_id},
+            relations: ["reviewedBy"],
+            select: {
+                reviewedBy: {
+                    first_name: true,
+                    last_name: true
+                }
+            },
+        })
+        if(!document) throw new NotFoundException('کاربر یافت نشد')
+        document.created_at = DateConvertor(document.created_at.toString(), false)
+        document.updated_at = DateConvertor(document.updated_at.toString(), false)
+        return document
+    }
+
     async checkDocumentExist(national_code? : string, student_number? :string){
         if(national_code){
             const member = await this.documentRepository.findOne({
                 where : {national_code}})
-            
+                if(member) throw new ConflictException('کاربر با این کد ملی قبلا ثبت نام کرده است')
         }
         if(student_number){
             const member = await this.documentRepository.findOne({where : {student_number}})
@@ -76,22 +94,40 @@ export class MembersService {
         }
     }
 
-    async checkMemberExist(id : number){
+    async findMemberById(id : number){
         const member = await this.membersRepository.findOne({
             where : {id},
-            relations : {document : true}
+            relations : {
+                user : true,
+                role : true,
+                department : true,
+                document : true,
+                permissions : true,
+            },
+            select : {
+                user : {first_name : true, last_name : true},
+                role : {code : true, role : true},
+                department : {id : true, name : true},
+                document : {id : true, status : true},
+                permissions : {code : true, access : true},
+            }  
         })
         if(!member) throw new NotFoundException('کاربر یافت نشد')
+        member.created_at = DateConvertor(member.created_at, false)
+        member.updated_at = DateConvertor(member.updated_at, false)
         return member
     }
 
     async findMembers(paginationDto: PaginationDto, searchDto: MemberSearchDto) {
-        const { search, mobile, from_date, to_date, end_GPA, GPA, entry, end_entry, gender, national_code, skills ,start_GPA, start_entry, student_number } = searchDto;
+        const { search, mobile, from_date, to_date, end_GPA, GPA, entry, status, end_entry, gender, national_code, skills ,start_GPA, start_entry, student_number } = searchDto;
         const { page, limit, skip } = paginationSolver(paginationDto);
         const query = this.membersRepository.createQueryBuilder("members");
         query.leftJoinAndSelect("members.document", "document");
         query.leftJoinAndSelect("members.user", "user");
     
+        if (status) {
+          query.andWhere("document.status = :status", { status });
+        }
         if (mobile) {
           query.andWhere("user.mobile = :mobile", { mobile });
         }
@@ -159,6 +195,8 @@ export class MembersService {
         
         query.select([
             "members.id",
+            "document.id",
+            "user.id",
             "user.first_name",
             "user.last_name", 
             "user.mobile", 
@@ -174,13 +212,16 @@ export class MembersService {
     
         if (members.length == 0) throw new NotFoundException("نتیحه ای یافت نشد.");
         const simplifiedMembers = members.map(member => ({
-            id: member.id,
+            member_id: member.id,
+            user_id : member.user.id,
+            document_id : member.document.id,
             first_name: member.user.first_name,
             last_name: member.user.last_name,
             mobile : member.user.mobile,
             student_number: member.document.student_number,
             national_code: member.document.national_code,
-            document_status: member.document.status
+            document_status: member.document.status,
+            created_at: DateConvertor(member.created_at, false)
         }));
         
         return {
@@ -189,25 +230,51 @@ export class MembersService {
         };
       }
 
-      async update(updateDto : UpdateMemberDto, resume : Express.Multer.File){  
-        const { description, skills } = updateDto;    
-        const member = await this.checkMemberExist(this.req.user.id)
-        if(!member?.document?.id) 
-            throw new NotFoundException('اطلاعات کاربر یافت نشد،')
-        if(description && description.length > 0){
-            member.document.description = description
-        }
-        if(skills && skills.length > 0){
-            member.document.skills = skills
-        }
-        if(resume){
-            const { Key, Location } = await this.s3service.uploadFile(resume, `AIC/members/document${this.req.user.id}`)
-            member.document.resume = {location : Location, key : Key}
-        }
+    async update(updateDto : UpdateMemberDto, resume : Express.Multer.File, profile_photo : Express.Multer.File) {  
+    const { description, skills } = updateDto;    
+    const member = await this.findMemberById(this.req.user.id)
 
-        await this.membersRepository.save(member)
+    if(!member?.document?.id) 
+        throw new NotFoundException('اطلاعات کاربر یافت نشد،')
+    if(description && description.length > 0){
+        member.document.description = description
+    }
+    if(skills && skills.length > 0){
+        member.document.skills = skills
+    }
+    if(resume){
+        const { Key, Location } = await this.s3service.uploadFile(resume, `AIC/members/document${this.req.user.id}`)
+        member.document.resume = {location : Location, key : Key}
+    }
+    if(profile_photo){
+        const { Key, Location } = await this.s3service.uploadFile(profile_photo, `AIC/members/document${this.req.user.id}`)
+        member.document.profile_photo = {location : Location, key : Key}
+    }
+
+    await this.documentRepository.save(member.document);
+    return {
+        message : "اطلاعات کاربر با موفقیت اپدیت شد."
+    }
+    }
+
+    async changeStatus(confirmDto : ConfirmDto){
+        const { reason, status, document_id } = confirmDto;
+        const  document = await this.documentRepository.findOneBy({id : +document_id})
+        if(!document) 
+            throw new NotFoundException('داده ای یافت نشد.')
+        if(status === document.status){
+            return {
+                message : `وضعیت داکیومنت ${status} میباشد`
+            }
+        }
+        if(status == StatusEnum.reject && !reason)
+            throw new BadRequestException('برای رد صحلاحیت باید دلیل وارد کنید')
+        document.status = status;
+        document.reason = reason;
+        document.reviewedById = this.req.user.id;
+        await this.documentRepository.save(document)
         return {
-            message : "اطلاعات کاربر با موفقیت اپدیت شد."
+            message : `وضعیت کاربر به ${status} تغییر کرد`
         }
     }
 }

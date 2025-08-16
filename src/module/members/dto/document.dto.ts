@@ -3,6 +3,7 @@ import { IsArray, IsEnum, IsInt, IsMobilePhone, IsNotEmpty, IsOptional, IsString
 import { skillEnum } from "src/common/enums/skill.enum";
 import { Type, Transform } from "class-transformer";
 import { IsJalaliDateTime } from "src/common/decorators/date.decorator";
+import { StatusEnum } from "src/common/enums/status.enum";
 
 export class DocumentDto {
     @ApiProperty()
@@ -95,6 +96,9 @@ export class MemberSearchDto {
     @IsOptional()
     @IsMobilePhone("fa-IR", {}, { message: "شماره تلفن نادرست میباشد." })
     mobile: string;
+    @ApiPropertyOptional({enum : StatusEnum})
+    @IsOptional()
+    status: string;
     @ApiPropertyOptional({ minimum: 1350, type: Number })
     @IsOptional()
     @Type(() => Number)
@@ -164,7 +168,7 @@ export class MemberSearchDto {
     @Min(1, { message: 'Limit must be 1 or greater' })
     @Max(100, { message: 'Limit cannot exceed 100' })
     limit?: number;
-  }
+}
 
   export class UpdateMemberDto {
     @ApiPropertyOptional()
@@ -174,6 +178,10 @@ export class MemberSearchDto {
     @IsOptional()
     @IsString()
     resume : string
+    @ApiPropertyOptional({format : "binary"})
+    @IsOptional()
+    @IsString()
+    profile_photo : string
     @ApiPropertyOptional({enum : skillEnum, type : "array",items : {type : "string"}})
     @IsOptional()
     @Transform(({ value }) => {
@@ -193,4 +201,16 @@ export class MemberSearchDto {
     @IsEnum(skillEnum, { each: true, message: "Invalid skill value" })
     skills : string[]
 
-  }
+}
+
+export class ConfirmDto {
+    @ApiProperty()
+    @IsString()
+    document_id : string
+    @ApiProperty({enum : StatusEnum})
+    @IsEnum(StatusEnum)
+    status : string
+    @ApiPropertyOptional()
+    @IsString()
+    reason : string
+}
