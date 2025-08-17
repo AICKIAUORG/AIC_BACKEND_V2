@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { DepartmentsService } from './departments.service';
 import { CreateDepartmentDto, UpdateDepartmentDto } from './dto/create-department.dto';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
@@ -25,10 +25,16 @@ export class DepartmentsController {
     return this.departmentsService.findOne(+id);
   }
 
-  @Patch(':id')
+  @Patch()
   @ApiConsumes(SwaggerEnums.UrlEncoded)
   update(@Body() updateDepartmentDto: UpdateDepartmentDto) {
     return this.departmentsService.update(updateDepartmentDto);
+  }
+
+  @Patch('/addMember')
+  @ApiConsumes(SwaggerEnums.UrlEncoded)
+  addMember(@Query('member_id') member_id: string, @Query('department_id') department_id: string) {
+    return this.departmentsService.addMember(+member_id, +department_id);
   }
 
   @Delete(':id')

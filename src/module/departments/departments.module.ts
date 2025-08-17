@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DepartmentEntity } from './entities/department.entity';
 import { AdminEntity } from 'src/admin/entities/admin.entity';
 import { CommissionEntity } from '../commissions/entities/commission.entity';
+import { MemberEntity } from '../members/entities/members.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([DepartmentEntity, AdminEntity, CommissionEntity])],
+  imports: [TypeOrmModule.forFeature([DepartmentEntity, AdminEntity, CommissionEntity, MemberEntity])],
   controllers: [DepartmentsController],
   providers: [DepartmentsService],
 })

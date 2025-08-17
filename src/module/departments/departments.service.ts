@@ -5,10 +5,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AdminEntity } from 'src/admin/entities/admin.entity';
 import { DepartmentEntity } from './entities/department.entity';
+import { MemberEntity } from '../members/entities/members.entity';
 
 @Injectable()
 export class DepartmentsService {
   constructor(
+    @InjectRepository(MemberEntity)
+    private readonly memberRepository : Repository<MemberEntity>,
     @InjectRepository(DepartmentEntity)
     private readonly departmentRepository : Repository<DepartmentEntity>,
     @InjectRepository(CommissionEntity)
@@ -64,7 +67,7 @@ export class DepartmentsService {
       where : {
         id
       },
-      relations : ['members'],
+      relations : ['members', 'members.user'],
       select : {members : {
         id : true,
         user : {
@@ -89,10 +92,8 @@ export class DepartmentsService {
 
   async update(updateDepartmentDto: UpdateDepartmentDto) {
     const {department_id, new_name} = updateDepartmentDto;
-    const department = await this.departmentRepository.findOneBy({id : +department_id})
-    if(!department){
-      throw new NotFoundException('دپارتمان یافت نشد.')
-    }
+    const department = await this.checkExist(+department_id)
+
     department.name = new_name
     await this.departmentRepository.save(department)
     await this.adminRepository.update({code : department.role_code}, {
@@ -100,6 +101,24 @@ export class DepartmentsService {
     })
     return {
       message : "دپارتمان با موفقیت اپدیت شد."
+    }
+  }
+  async checkExist(id : number){
+    const department = await this.departmentRepository.findOneBy({ id })
+    if(!department){
+      throw new NotFoundException('دپارتمان یافت نشد.')
+    }
+    return department
+  }
+  async addMember(member_id : number, department_id : number){
+    await this.checkExist(department_id)
+    const member = await this.memberRepository.findOneBy({ id : member_id })
+    if(!member)
+      throw new NotFoundException('کاربر یافت نشد.')
+    member.department_id = department_id
+    await this.memberRepository.save(member)
+    return {
+      message : "کاربر با موفقیت عضو دپارتمان شد."
     }
   }
 
