@@ -2,12 +2,16 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { CommissionsService } from './commissions.service';
 import { CreateCommissionDto } from './dto/create-commission.dto';
 import { UpdateCommissionDto } from './dto/update-commission.dto';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { SwaggerEnums } from 'src/common/enums/swagger.enum';
 
 @Controller('commissions')
+@ApiTags('Commissions')
 export class CommissionsController {
   constructor(private readonly commissionsService: CommissionsService) {}
 
   @Post()
+  @ApiConsumes(SwaggerEnums.UrlEncoded)
   create(@Body() createCommissionDto: CreateCommissionDto) {
     return this.commissionsService.create(createCommissionDto);
   }

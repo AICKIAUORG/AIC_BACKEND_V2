@@ -1,3 +1,4 @@
+import { AdminEntity } from "src/admin/entities/admin.entity";
 import { DepartmentEntity } from "src/module/departments/entities/department.entity";
 import { MemberEntity } from "src/module/members/entities/members.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
@@ -9,10 +10,10 @@ export class CommissionEntity {
     @Column()
     name : string
     @Column()
-    head_id : number
-    @OneToOne(() => MemberEntity, {nullable : true})
-    @JoinColumn({name : "head_id"})
-    head : MemberEntity
+    role_code : number
+    @OneToOne(() => AdminEntity)
+    @JoinColumn({name : "role_code"})
+    role : AdminEntity
     @OneToMany(() => DepartmentEntity, (department) => department.commission, {nullable : true})
     departments : DepartmentEntity[]
     @CreateDateColumn({type : "timestamptz"})
