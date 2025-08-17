@@ -8,6 +8,8 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthModule } from 'src/auth/auth.module';
 import { MembersModule } from '../members/members.module';
 import { UsersModule } from '../users/users.module';
+import { CommissionsModule } from '../commissions/commissions.module';
+import { DepartmentsModule } from '../departments/departments.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { UsersModule } from '../users/users.module';
   AuthModule,
   MembersModule,
   UsersModule,
+  CommissionsModule,
+  DepartmentsModule
 ],
   controllers: [],
   providers: [
