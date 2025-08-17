@@ -77,8 +77,8 @@ export class MembersService {
             },
         })
         if(!document) throw new NotFoundException('کاربر یافت نشد')
-        document.created_at = DateConvertor(document.created_at.toString(), false)
-        document.updated_at = DateConvertor(document.updated_at.toString(), false)
+        document.created_at = DateConvertor(document.created_at, false)
+        document.updated_at = DateConvertor(document.updated_at, false)
         return document
     }
 
