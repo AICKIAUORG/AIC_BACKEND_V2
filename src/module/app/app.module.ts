@@ -10,6 +10,7 @@ import { MembersModule } from '../members/members.module';
 import { UsersModule } from '../users/users.module';
 import { CommissionsModule } from '../commissions/commissions.module';
 import { DepartmentsModule } from '../departments/departments.module';
+import { AdminModule } from 'src/admin/admin.module';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { DepartmentsModule } from '../departments/departments.module';
   MembersModule,
   UsersModule,
   CommissionsModule,
-  DepartmentsModule
+  DepartmentsModule,
+  AdminModule
 ],
   controllers: [],
   providers: [
