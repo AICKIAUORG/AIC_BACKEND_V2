@@ -2,8 +2,11 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { AdminService } from './admin.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { SwaggerEnums } from 'src/common/enums/swagger.enum';
 
 @Controller('admin')
+@ApiTags('admins')
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
@@ -30,5 +33,11 @@ export class AdminController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.adminService.remove(+id);
+  }
+  
+  @Patch('/removeFromDepartment/:id')
+  @ApiConsumes(SwaggerEnums.UrlEncoded)
+  removeFromDepartment(@Param('id') user_id: string) {
+    return this.adminService.removeMemberFromDepartment(+user_id);
   }
 }

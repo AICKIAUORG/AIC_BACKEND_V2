@@ -42,9 +42,21 @@ export class AdminService {
         members : {id}
       }})
     if(permission.includes(user_permissions?.code)) return true
+    if(100 < user_role?.code && user_role?.code < 200) return true
     if(200 < user_role?.code && user_role?.code < 300 && role.includes(200)) return true
     if(300 < user_role?.code && user_role?.code < 400 && role.includes(300)) return true
     if(role.includes(user_role?.code)) return true
     return false
+  }
+
+  async removeMemberFromDepartment(memberId: number) {
+    const memberRepo = this.adminRepository.manager.getRepository('MemberEntity');
+    const member = await memberRepo.findOneBy({ id: memberId });
+    if (!member) {
+      throw new Error('عضو مورد نظر یافت نشد.');
+    }
+    member.department_id = null;
+    await memberRepo.save(member);
+    return { message: 'عضویت عضو از دپارتمان با موفقیت حذف شد.' };
   }
 }
