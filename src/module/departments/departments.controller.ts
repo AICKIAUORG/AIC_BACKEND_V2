@@ -3,6 +3,8 @@ import { DepartmentsService } from './departments.service';
 import { CreateDepartmentDto, UpdateDepartmentDto } from './dto/create-department.dto';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { SwaggerEnums } from 'src/common/enums/swagger.enum';
+import { UserAuth } from 'src/common/decorators/auth.decorator';
+import { Access } from 'src/common/decorators/roles.decorator';
 
 @Controller('departments')
 @ApiTags('Departments')
@@ -31,6 +33,8 @@ export class DepartmentsController {
     return this.departmentsService.update(updateDepartmentDto);
   }
 
+  @UserAuth()
+  @Access([200,300])
   @Patch('/addMember')
   @ApiConsumes(SwaggerEnums.UrlEncoded)
   addMember(@Query('member_id') member_id: string, @Query('department_id') department_id: string) {

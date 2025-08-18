@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Inject, Injectable, NotFoundException, Scope, UnauthorizedException } from '@nestjs/common';
 import { CreateDepartmentDto, UpdateDepartmentDto } from './dto/create-department.dto';
 import { CommissionEntity } from '../commissions/entities/commission.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,10 +6,14 @@ import { Repository } from 'typeorm';
 import { AdminEntity } from 'src/admin/entities/admin.entity';
 import { DepartmentEntity } from './entities/department.entity';
 import { MemberEntity } from '../members/entities/members.entity';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
 
-@Injectable()
+@Injectable({scope : Scope.REQUEST})
 export class DepartmentsService {
   constructor(
+    @Inject(REQUEST)
+    private req : Request,
     @InjectRepository(MemberEntity)
     private readonly memberRepository : Repository<MemberEntity>,
     @InjectRepository(DepartmentEntity)
@@ -111,15 +115,42 @@ export class DepartmentsService {
     return department
   }
   async addMember(member_id : number, department_id : number){
-    await this.checkExist(department_id)
+    let access = false;
+    const admin = await this.adminRepository.findOneBy({member_id : this.req.user.id})
+    const department = await this.departmentRepository.findOne({
+      where : {
+        id : department_id
+      },
+      relations : ['commission']
+    })
     const member = await this.memberRepository.findOneBy({ id : member_id })
+
     if(!member)
       throw new NotFoundException('کاربر یافت نشد.')
-    member.department_id = department_id
-    await this.memberRepository.save(member)
-    return {
-      message : "کاربر با موفقیت عضو دپارتمان شد."
+    if(member.department_id){
+      if(member.department_id == department_id)
+        throw new ConflictException('کاربر عضو این دپارتمان میباشد.')
+      throw new ConflictException('کاریر عضو دپادتمان دیگری است.')
     }
+
+    if(!department){
+      throw new NotFoundException('دپارتمان یافت نشد.')
+    }
+    if(admin.code > 100 && admin.code < 200){
+      access = true
+    }else if(admin.code > 200 && admin.code < 400){
+      if(department.role_code == admin.code || department.commission.role_code == admin.code){
+        access = true
+      }
+    }
+    if(access){
+      member.department_id = department_id
+      await this.memberRepository.save(member)
+      return {
+        message : "کاربر با موفقیت عضو دپارتمان شد."
+      }
+    }
+    throw new UnauthorizedException('دسترسی شما محدود است')
   }
 
   remove(id: number) {
