@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { SwaggerEnums } from 'src/common/enums/swagger.enum';
 
 @Controller('admin')
@@ -20,14 +20,14 @@ export class AdminController {
     return this.adminService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.adminService.findOne(+id);
+  @Get(':code')
+  findOne(@Param('code') code: string) {
+    return this.adminService.findOne(+code);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAdminDto: UpdateAdminDto) {
-    return this.adminService.update(+id, updateAdminDto);
+  @Patch('removeAdmin:head_id')
+  removeAdmin(@Param('head_id') head_id : string) {
+    return this.adminService.removeAdmin(+head_id);
   }
 
   @Delete(':id')

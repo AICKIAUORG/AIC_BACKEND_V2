@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AdminEntity } from './entities/admin.entity';
 import { Repository } from 'typeorm';
 import { PermissionEntity } from './entities/permission.entity';
+import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class AdminService {
@@ -18,16 +19,68 @@ export class AdminService {
     return 'This action adds a new admin';
   }
 
-  findAll() {
-    return `This action returns all admin`;
+  async findAll() {
+    const admins = await this.adminRepository.find({
+      relations : { member : { user : true } }
+    })
+    const mappedAdmins = admins
+      .map(admin => {
+        return {
+          code: admin.code,
+          name: admin.role,
+          head_name: admin.member_id
+            ? `${admin?.member?.user?.first_name} ${admin?.member?.user?.last_name}`
+            : "مشخص نشده",
+          head_id: admin.member_id
+            ? admin.member_id
+            : "مشخص نشده"
+        }
+      })
+      .sort((a, b) => a.code - b.code);
+    return {
+      admins : mappedAdmins.length > 0 ? mappedAdmins : []
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} admin`;
+  async findOne(code: number) {
+    const admin = await this.adminRepository.findOne({
+      where : { code },
+      relations : { member : { user : true } }
+    })
+    if(!admin)
+      throw new NotFoundException('نتیجه ای یافت نشد.')
+
+    return {
+      code : admin.code,
+      name : admin.role,
+      head_name: admin.member_id
+        ? `${admin?.member?.user?.first_name} ${admin?.member?.user?.last_name}`
+        : "مشخص نشده",
+      head_id: admin.member_id
+        ? admin.member_id
+        : "مشخص نشده"
+    }
   }
 
-  update(id: number, updateAdminDto: UpdateAdminDto) {
-    return `This action updates a #${id} admin`;
+  async removeAdmin(id: number) {
+    const admin = await this.adminRepository.findOne({ 
+      where : {
+        member_id : id 
+      },
+      relations : { member : {user : true} }
+    })
+    if(!admin)
+      throw new NotFoundException('نتیجه ای یافت نشد.')
+    await this.adminRepository.update({ member_id : id },{ member_id : null })
+
+    return {
+      message : `کاربر ${admin?.member?.user?.first_name} ${admin?.member?.user?.last_name} از حالت مدیریت خارج شد`
+    }
+
+  }
+
+  async addAdmin(code : number, member_id : number){
+    
   }
 
   remove(id: number) {
