@@ -1,6 +1,5 @@
-import { ConflictException, Injectable } from '@nestjs/common';
-import { CreateCommissionDto } from './dto/create-commission.dto';
-import { UpdateCommissionDto } from './dto/update-commission.dto';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { CreateCommissionDto, UpdateCommissionDto } from './dto/commission.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CommissionEntity } from './entities/commission.entity';
 import { Repository } from 'typeorm';
@@ -43,19 +42,109 @@ export class CommissionsService {
     }
   }
 
-  findAll() {
-    return `This action returns all commissions`;
+  async findAll() {
+    const commissions = await this.commissionRepository.find({ relations: {
+       departments : {
+          members : true,
+          role : {
+          member : {
+            user : true
+          }
+        } 
+      }, role : {
+        member : {
+          user : true
+        }
+      }
+    }
+  });
+    return commissions.map(commissions => ({
+      name : commissions.name,
+      head : commissions.role.member_id ?
+       `${commissions?.role?.member?.user?.first_name} ${commissions?.role?.member?.user?.last_name}` :
+       "مشخص نشده",
+      id : commissions.id,
+      departments: commissions.departments.map(dep => {
+        return {
+          name : dep.name,
+          head : dep.role.member_id ?
+            `${dep?.role?.member?.user?.first_name} ${dep?.role?.member?.user?.last_name}` :
+            "مشخص نشده",
+          department_id : dep.id,
+          membersCount: dep.members ? dep.members.length : 0
+        }
+      }),
+    }));
+  }
+  async findOne(id: number) {
+    const commissions = await this.commissionRepository.findOne({
+      where : {
+        id
+      },
+      relations: {
+        departments : {
+           members : true,
+           role : {
+           member : {
+             user : true
+           }
+         } 
+        }, role : {
+          member : {
+            user : true
+          }
+        }
+      }
+    })
+    if(!commissions)
+      throw new NotFoundException('کمیسیون یافت نشذ.')
+
+    return {
+      name : commissions.name,
+      head : commissions.role.member_id ?
+       `${commissions?.role?.member?.user?.first_name} ${commissions?.role?.member?.user?.last_name}` :
+       "مشخص نشده",
+      id : commissions.id,
+      departments: commissions.departments.map(dep => {
+        return {
+          name : dep.name,
+          head : dep.role.member_id ?
+            `${dep?.role?.member?.user?.first_name} ${dep?.role?.member?.user?.last_name}` :
+            "مشخص نشده",
+          department_id : dep.id,
+          membersCount: dep.members ? dep.members.length : 0
+        }
+      }),
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} commission`;
+  async update(updateCommissionDto: UpdateCommissionDto) {
+    const {commission_id, new_name} = updateCommissionDto;
+    const commission = await this.checkExist(+commission_id)
+
+    commission.name = new_name
+    await this.commissionRepository.save(commission)
+    await this.adminRepository.update({code : commission.role_code}, {
+      role : new_name
+    })
+    return {
+      message : "کمیسیون با موفقیت اپدیت شد."
+    }
+  }
+  async checkExist(id : number){
+    const commission = await this.commissionRepository.findOneBy({ id })
+    if(!commission){
+      throw new NotFoundException('کمیسیون یافت نشد.')
+    }
+    return commission
   }
 
-  update(id: number, updateCommissionDto: UpdateCommissionDto) {
-    return `This action updates a #${id} commission`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} commission`;
+  async remove(id: number) {
+    const { role_code } = await this.checkExist(id)
+    await this.commissionRepository.delete({id})
+    await this.adminRepository.delete({code : role_code})
+    return {
+      message : "کمیسیون با موفقیت حذف شد"
+    }
   }
 }
