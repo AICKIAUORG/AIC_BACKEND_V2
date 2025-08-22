@@ -30,14 +30,19 @@ export class AdminController {
     return this.adminService.removeAdmin(+head_id);
   }
 
+  @Patch('addAdmin')
+  addAdmin(@Query('code') code: string, @Query('member_id') member_id: string) {
+    return this.adminService.addAdmin(+code, +member_id);
+  }
+
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.adminService.remove(+id);
   }
   
-  @Patch('/removeFromDepartment/:id')
+  @Patch('/removeFromDepartment/:member_id')
   @ApiConsumes(SwaggerEnums.UrlEncoded)
-  removeFromDepartment(@Param('id') user_id: string) {
-    return this.adminService.removeMemberFromDepartment(+user_id);
+  removeFromDepartment(@Param('member_id') member_id: string) {
+    return this.adminService.removeMemberFromDepartment(+member_id);
   }
 }
