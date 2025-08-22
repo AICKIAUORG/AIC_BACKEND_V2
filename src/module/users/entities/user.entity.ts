@@ -6,15 +6,15 @@ import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGenerate
 export class UserEntity {
   @PrimaryGeneratedColumn("increment")
   id: number;
-  @Column()
+  @Column({ nullable : true })
   first_name: string;
-  @Column()
+  @Column({ nullable : true })
   last_name: string;
   @Column({ unique: true })
   mobile: string;
-  @Column({ unique: true })
+  @Column({ unique: true , nullable : true })
   email: string;
-  @Column()
+  @Column({ nullable : true })
   password: string;
   @Column({ default: false })
   mobile_verify: boolean;

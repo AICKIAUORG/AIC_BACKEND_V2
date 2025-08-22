@@ -116,7 +116,7 @@ export class DepartmentsService {
   }
   async addMember(member_id : number, department_id : number){
     let access = false;
-    const admin = await this.adminRepository.findOneBy({member_id : this.req.user.id})
+    const admin = await this.adminRepository.findOneBy({member_id : this.req.user.member_id})
     const department = await this.departmentRepository.findOne({
       where : {
         id : department_id
@@ -153,7 +153,12 @@ export class DepartmentsService {
     throw new UnauthorizedException('دسترسی شما محدود است')
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} department`;
+  async remove(id: number) {
+    const { role_code } = await this.checkExist(id)
+    await this.departmentRepository.delete({id})
+    await this.adminRepository.delete({code : role_code})
+    return {
+      message : "دپارتمان با موفقیت حذف شد"
+    }
   }
 }

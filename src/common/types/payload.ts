@@ -1,6 +1,6 @@
 export type TokenPayload = {
     mobile : string,
     id : number,
-    membership : boolean,
+    member_id : number,
     token_version : number
 } 

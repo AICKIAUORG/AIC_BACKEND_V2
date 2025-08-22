@@ -34,13 +34,15 @@ export class DepartmentsController {
   }
 
   @UserAuth()
-  @Access([200,300])
+  @Access([100,200,300])
   @Patch('/addMember')
   @ApiConsumes(SwaggerEnums.UrlEncoded)
   addMember(@Query('member_id') member_id: string, @Query('department_id') department_id: string) {
     return this.departmentsService.addMember(+member_id, +department_id);
   }
 
+  @UserAuth()
+  @Access([100])
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.departmentsService.remove(+id);

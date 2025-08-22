@@ -29,7 +29,7 @@ export class MembersService {
         const {skills, national_code, student_number, entry_year, gender, GPA, description} = documentDto
         let resumeLocation : string;
         let resumeKey : string;
-        if(this.req.user.membership) throw new ConflictException('شما قبلا ثبت نام کرده اید')
+        if(this.req.user.member_id) throw new ConflictException('شما قبلا ثبت نام کرده اید')
         await this.checkDocumentExist(national_code, student_number)
         const member = this.membersRepository.create({user_id : this.req.user.id})
         const {id} = await this.membersRepository.save(member)
@@ -52,7 +52,7 @@ export class MembersService {
         const {Location : cardLocation, Key : cardKey} = await this.s3service.uploadFile(studentCard_image,`AIC/members/document${this.req.user.id}`)
         document.studentCard_image = {location : cardLocation, key : cardKey}
         await this.documentRepository.save(document)
-        const {accessToken, refreshToken} = this.authService.TokenGenerator({id : this.req.user.id, mobile : this.req.user.mobile, membership : true, token_version : this.req.user.token_version + 1})
+        const {accessToken, refreshToken} = this.authService.TokenGenerator({id : this.req.user.id, mobile : this.req.user.mobile, member_id : id, token_version : this.req.user.token_version + 1})
         await this.membersRepository.manager.getRepository("users").update(
             { id : this.req.user.id},
             { token_version: this.req.user.token_version + 1 }

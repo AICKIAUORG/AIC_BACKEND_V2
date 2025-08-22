@@ -76,11 +76,7 @@ export class AuthService {
       await this.userRepository.save(user);
     } else {
       const user = this.userRepository.create({
-        first_name : "Not Verified",
-        last_name : "Not Verified",
-        email : "Not Verified",
         mobile: phoneNumber,
-        password : "Not Verified",
         otp: code,
         expires_in: expiration,
       });
@@ -125,18 +121,12 @@ export class AuthService {
     }
 
     if (!profile?.mobile_verify) {
-      
-        await this.userRepository.update(
-            { id: profile.id },
-            {
-                mobile_verify : true
-            }
-        )
+      profile.mobile_verify = true
     }
     const { accessToken, refreshToken } = this.TokenGenerator({
       id: profile?.id,
       mobile: profile?.mobile,
-      membership : profile?.membership ? true : false,
+      member_id : profile?.membership ? profile.membership.id : null,
       token_version : profile?.token_version + 1
     });
     profile.token_version += 1
@@ -158,12 +148,12 @@ export class AuthService {
         {mobile : Username}
       ]
     })
-    if(user){
+    if(user && user.password && user.mobile_verify){
       if(compareSync(password, user.password)){
         const { accessToken, refreshToken } = this.TokenGenerator({
           id: user?.id,
           mobile: user?.mobile,
-          membership : user?.membership ? true : false,
+          member_id : user?.membership ? user.membership.id : null,
           token_version : user?.token_version + 1
         });
         user.token_version += 1
@@ -230,9 +220,9 @@ export class AuthService {
         secret: process.env.REFRESH_TOKEN_SECRET,
       });
       if (verify.mobile) {
-        const { id, mobile, membership, token_version } = verify;
+        const { id, mobile, member_id, token_version } = verify;
         await this.userRepository.update({id : verify.id}, {token_version : token_version + 1})
-        return this.TokenGenerator({ id, mobile , membership, token_version : token_version + 1});
+        return this.TokenGenerator({ id, mobile , member_id, token_version : token_version + 1});
       }
       throw new UnauthorizedException("رفرش توکن معبر وارد کنید");
     } catch (error) {
@@ -241,7 +231,7 @@ export class AuthService {
   }
 
   async resetPasswordLink(mobileDto : SendOtpDto){
-    const { mobile } = mobileDto
+    const { mobile } = mobileDto 
     const { phoneNumber } = mobileValidation(mobile)
     const user = await this.userRepository.findOneBy({mobile : phoneNumber})
     if(user && user?.mobile_verify){

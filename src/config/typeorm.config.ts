@@ -19,7 +19,7 @@ export class TypeOrmConfig implements TypeOrmOptionsFactory{
         database : DB_NAME,
         username : DB_USERNAME,
         password : DB_PASSWORD,
-        synchronize : false,
+        synchronize : true,
         dropSchema : false,
         logging : false,
         // entities : [OneTimeToken, UserEntity, MemberEntity, AdminEntity, PermissionEntity, DocumentEntity, DepartmentEntity, CommissionEntity],

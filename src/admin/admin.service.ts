@@ -40,9 +40,11 @@ export class AdminService {
       relations : {members : true},
       where : {
         members : {id}
-      }})
+    }})
+    console.log(id);
+    console.log(user_role.code);
     if(permission.includes(user_permissions?.code)) return true
-    if(100 < user_role?.code && user_role?.code < 200) return true
+    if(100 < user_role?.code && user_role?.code < 200 && role.includes(100)) return true
     if(200 < user_role?.code && user_role?.code < 300 && role.includes(200)) return true
     if(300 < user_role?.code && user_role?.code < 400 && role.includes(300)) return true
     if(role.includes(user_role?.code)) return true
