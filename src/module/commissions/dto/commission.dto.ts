@@ -6,3 +6,12 @@ export class CreateCommissionDto {
     @IsString()
     name : string
 }
+
+export class UpdateCommissionDto {
+    @ApiProperty()
+    @IsString()
+    new_name : string
+    @ApiProperty()
+    @IsString()
+    commission_id : string
+}
