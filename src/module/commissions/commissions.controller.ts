@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { CommissionsService } from './commissions.service';
-import { CreateCommissionDto } from './dto/create-commission.dto';
-import { UpdateCommissionDto } from './dto/update-commission.dto';
+import { CreateCommissionDto, UpdateCommissionDto } from './dto/commission.dto';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { SwaggerEnums } from 'src/common/enums/swagger.enum';
 
@@ -26,9 +25,10 @@ export class CommissionsController {
     return this.commissionsService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCommissionDto: UpdateCommissionDto) {
-    return this.commissionsService.update(+id, updateCommissionDto);
+  @Patch()
+  @ApiConsumes(SwaggerEnums.UrlEncoded)
+  update(@Body() updateCommissionDto: UpdateCommissionDto) {
+    return this.commissionsService.update(updateCommissionDto);
   }
 
   @Delete(':id')
