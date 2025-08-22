@@ -10,6 +10,8 @@ import { OneTimeToken } from "src/auth/entities/one-time-token.entity";
 import { AdminService } from "src/admin/admin.service";
 import { AdminEntity } from "src/admin/entities/admin.entity";
 import { PermissionEntity } from "src/admin/entities/permission.entity";
+import { DepartmentEntity } from "../departments/entities/department.entity";
+import { MemberEntity } from "../members/entities/members.entity";
 
 @Module({
   imports: [
@@ -17,8 +19,11 @@ import { PermissionEntity } from "src/admin/entities/permission.entity";
       UserEntity,
       OneTimeToken,
       AdminEntity,
-      PermissionEntity
+      PermissionEntity,
+      DepartmentEntity,
+      MemberEntity
     ]),
+    
   ],
   controllers: [UsersController],
   providers: [
