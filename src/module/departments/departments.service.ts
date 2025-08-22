@@ -1,5 +1,5 @@
 import { ConflictException, Inject, Injectable, NotFoundException, Scope, UnauthorizedException } from '@nestjs/common';
-import { CreateDepartmentDto, UpdateDepartmentDto } from './dto/create-department.dto';
+import { CreateDepartmentDto, UpdateDepartmentDto } from './dto/department.dto';
 import { CommissionEntity } from '../commissions/entities/commission.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -57,13 +57,29 @@ export class DepartmentsService {
   }
 
   async findAll() {
-    const departments = await this.departmentRepository.find({ relations: ['members'] });
+    const departments = await this.departmentRepository.find({ relations: {
+      commission : true,
+      members : true, 
+      role : {
+        member : {
+          user : true
+        }
+      }
+    }
+  });
     return departments.map(dep => ({
-      ...dep,
+      name : dep.name,
+      id : dep.id,
+      commission : dep.commission.name,
+      commission_id : dep.commission_id,
+      head : dep.role.member_id ?
+        `${dep?.role?.member?.user?.first_name} ${dep?.role?.member?.user?.last_name}` :
+        "مشخص نشده",
       membersCount: dep.members ? dep.members.length : 0,
-      members: undefined 
+      members: undefined,
+      updated_at : undefined,
+      created_at : undefined
     }));
-
   }
 
   async findOne(id: number) {
