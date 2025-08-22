@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { DepartmentsService } from './departments.service';
-import { CreateDepartmentDto, UpdateDepartmentDto } from './dto/create-department.dto';
+import { CreateDepartmentDto, UpdateDepartmentDto } from './dto/department.dto';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { SwaggerEnums } from 'src/common/enums/swagger.enum';
 import { UserAuth } from 'src/common/decorators/auth.decorator';
