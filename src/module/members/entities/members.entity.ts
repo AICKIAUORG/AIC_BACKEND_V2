@@ -1,11 +1,15 @@
 import { AdminEntity } from "src/admin/entities/admin.entity";
 import { DepartmentEntity } from "src/module/departments/entities/department.entity";
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, ManyToOne, JoinColumn, UpdateDateColumn, CreateDateColumn, ManyToMany, JoinTable } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, ManyToOne, JoinColumn, UpdateDateColumn, CreateDateColumn, ManyToMany, JoinTable, Index } from "typeorm";
 import { DocumentEntity } from "./document.entity";
 import { UserEntity } from "src/module/users/entities/user.entity";
 import { PermissionEntity } from "src/admin/entities/permission.entity";
 
 @Entity("members")
+@Index(['user_id'])
+@Index(['department_id'])
+@Index(['created_at'])
+@Index(['user_id', 'department_id'])
 export class MemberEntity {
     @PrimaryGeneratedColumn()
     id: number;

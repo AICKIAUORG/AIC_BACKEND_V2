@@ -1,34 +1,50 @@
-import { role } from "src/common/enums/role.enum";
-import { MemberEntity } from "src/module/members/entities/members.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn, } from "typeorm";
+import { role } from 'src/common/enums/role.enum';
+import { MemberEntity } from 'src/module/members/entities/members.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  Index,
+} from 'typeorm';
 
 @Entity('users')
+@Index(['mobile'])
+@Index(['email'])
+@Index(['mobile_verify'])
+@Index(['created_at'])
+@Index(['first_name', 'last_name'])
 export class UserEntity {
-  @PrimaryGeneratedColumn("increment")
+  @PrimaryGeneratedColumn('increment')
   id: number;
-  @Column({ nullable : true })
+  @Column({ nullable: true })
   first_name: string;
-  @Column({ nullable : true })
+  @Column({ nullable: true })
   last_name: string;
   @Column({ unique: true })
   mobile: string;
-  @Column({ unique: true , nullable : true })
+  @Column({ unique: true, nullable: true })
   email: string;
-  @Column({ nullable : true })
+  @Column({ nullable: true })
   password: string;
   @Column({ default: false })
   mobile_verify: boolean;
   @Column({ default: 0 })
   token_version: number;
-  @OneToOne(() => MemberEntity, (member) => member.user, {nullable : true, onDelete : "SET NULL"})
+  @OneToOne(() => MemberEntity, (member) => member.user, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   membership: MemberEntity;
   @Column({ nullable: true })
   otp: string;
   @Column({ nullable: true })
   expires_in: Date;
-  @CreateDateColumn({type : "timestamptz"})
+  @CreateDateColumn({ type: 'timestamptz' })
   created_at: string;
-  @UpdateDateColumn({type : "timestamptz"})
+  @UpdateDateColumn({ type: 'timestamptz' })
   updated_at: Date;
 }
- 

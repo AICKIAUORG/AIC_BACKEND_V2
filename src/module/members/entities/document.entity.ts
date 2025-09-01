@@ -1,10 +1,19 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn, Index } from "typeorm";
 import { MemberEntity } from "./members.entity";
 import { skillEnum } from "src/common/enums/skill.enum";
 import { StatusEnum } from "src/common/enums/status.enum";
 import { UserEntity } from "src/module/users/entities/user.entity";
 
 @Entity("documents")
+@Index(['member_id'])
+@Index(['national_code'])
+@Index(['student_number'])
+@Index(['status'])
+@Index(['gender'])
+@Index(['entry_year'])
+@Index(['created_at'])
+@Index(['status', 'created_at'])
+@Index(['member_id', 'status'])
 export class DocumentEntity {
     @PrimaryGeneratedColumn()
     id : number

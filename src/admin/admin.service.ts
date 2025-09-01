@@ -145,7 +145,7 @@ export class AdminService {
       where : {
         members : {id}
     }})
-    if(permission.includes(user_permissions?.code)) return true
+    if(permission.length > 0 && permission.includes(user_permissions?.code)) return true
     if(100 < user_role?.code && user_role?.code < 200 && role.includes(100)) return true
     if(200 < user_role?.code && user_role?.code < 300 && role.includes(200)) return true
     if(300 < user_role?.code && user_role?.code < 400 && role.includes(300)) return true
