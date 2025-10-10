@@ -1,6 +1,6 @@
 import { ActivityType } from "src/common/enums/activity.enum";
 import { IsEnum, IsString, IsNumber, IsOptional, IsDate, IsBoolean, IsObject, Min, Max } from "class-validator";
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { StatusEnum } from "src/common/enums/status.enum";
 
 export class CreateActivityDto {
@@ -63,37 +63,37 @@ export class ApproveActivityDto {
 }
 
 export class ActivityFilterDto {
-  @ApiProperty({ enum: ActivityType, description: "نوع فعالیت", required: false })
+  @ApiPropertyOptional({ enum: ActivityType, description: "نوع فعالیت" })
   @IsOptional()
   @IsEnum(ActivityType)
   activity_type?: ActivityType;
 
-  @ApiProperty({ enum: StatusEnum, description: "وضعیت فعالیت", required: false })
+  @ApiPropertyOptional({ enum: StatusEnum, description: "وضعیت فعالیت" })
   @IsOptional()
   @IsEnum(StatusEnum)
   status?: StatusEnum;
 
-  @ApiProperty({ description: "شناسه کاربر", required: false })
+  @ApiPropertyOptional({ description: "شناسه کاربر" })
   @IsOptional()
   @IsNumber()
-  user_id?: number;
+  member_id?: number;
 
-  @ApiProperty({ description: "شناسه دپارتمان", required: false })
+  @ApiPropertyOptional({ description: "شناسه دپارتمان" })
   @IsOptional()
   @IsNumber()
   department_id?: number;
 
-  @ApiProperty({ description: "شناسه کمیسیون", required: false })
+  @ApiPropertyOptional({ description: "شناسه کمیسیون" })
   @IsOptional()
   @IsNumber()
   commission_id?: number;
 
-  @ApiProperty({ description: "تاریخ شروع از", required: false })
+  @ApiPropertyOptional({ description: "تاریخ شروع از" })
   @IsOptional()
   @IsDate()
   start_date_from?: Date;
 
-  @ApiProperty({ description: "تاریخ شروع تا", required: false })
+  @ApiPropertyOptional({ description: "تاریخ شروع تا" })
   @IsOptional()
   @IsDate()
   start_date_to?: Date;

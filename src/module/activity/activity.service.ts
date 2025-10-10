@@ -27,8 +27,8 @@ export class ActivityService {
     private memberService : MembersService,
   ) {}
 
-  async createActivity(createActivityDto: CreateActivityDto): Promise<ActivityEntity> {
-    const { points, member_id } = createActivityDto
+  async createActivity(createActivityDto: CreateActivityDto) {
+    const { points, member_id, } = createActivityDto
 
     if(!await this.memberService.findMemberById(member_id)){
       throw new NotFoundException('کاربر یافت نشد.')
@@ -47,7 +47,7 @@ export class ActivityService {
     return await this.activityRepository.save(activity);
   }
 
-  async findAllActivities(filterDto?: ActivityFilterDto): Promise<ActivityEntity[]> {
+  async findAllActivities(filterDto?: ActivityFilterDto) {
     const where: FindOptionsWhere<ActivityEntity> = {};
 
     if (filterDto?.activity_type) {
@@ -56,11 +56,11 @@ export class ActivityService {
     if (filterDto?.status) {
       where.status = filterDto.status;
     }
-    if (filterDto?.user_id) {
-      where.user_id = filterDto.user_id;
+    if (filterDto?.member_id) {
+      where.member_id = filterDto.member_id;
     }
     if (filterDto?.department_id) {
-      where.department_id = filterDto.department_id;
+      where.section_codedepartment_id = filterDto.department_id;
     }
     if (filterDto?.commission_id) {
       where.commission_id = filterDto.commission_id;
