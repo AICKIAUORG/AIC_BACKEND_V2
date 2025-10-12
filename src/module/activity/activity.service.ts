@@ -59,18 +59,12 @@ export class ActivityService {
     if (filterDto?.member_id) {
       where.member_id = filterDto.member_id;
     }
-    if (filterDto?.department_id) {
-      where.section_codedepartment_id = filterDto.department_id;
-    }
-    if (filterDto?.commission_id) {
-      where.commission_id = filterDto.commission_id;
+    if (filterDto?.section_code) {
+      where.section_code = filterDto.section_code;
     }
 
-    const query = this.activityRepository.createQueryBuilder('activity')
-      .leftJoinAndSelect('activity.user', 'user')
-      .leftJoinAndSelect('activity.department', 'department')
-      .leftJoinAndSelect('activity.commission', 'commission')
-      .leftJoinAndSelect('activity.approver', 'approver')
+    const query = this.activityRepository.createQueryBuilder('activities')
+      .leftJoinAndSelect('activities.user', 'user')
       .where(where);
 
     if (filterDto?.start_date_from && filterDto?.start_date_to) {

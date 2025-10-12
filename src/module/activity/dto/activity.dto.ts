@@ -78,15 +78,10 @@ export class ActivityFilterDto {
   @IsNumber()
   member_id?: number;
 
-  @ApiPropertyOptional({ description: "شناسه دپارتمان" })
+  @ApiPropertyOptional({ description: "شناسه واحد" })
   @IsOptional()
   @IsNumber()
-  department_id?: number;
-
-  @ApiPropertyOptional({ description: "شناسه کمیسیون" })
-  @IsOptional()
-  @IsNumber()
-  commission_id?: number;
+  section_code?: number;
 
   @ApiPropertyOptional({ description: "تاریخ شروع از" })
   @IsOptional()
