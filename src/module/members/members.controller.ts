@@ -3,14 +3,10 @@ import { MembersService } from "./members.service";
 import { ApiConsumes, ApiQuery, ApiTags, ApiOperation, ApiBody, ApiResponse } from "@nestjs/swagger";
 import { UserAuth } from "src/common/decorators/auth.decorator";
 import { SwaggerEnums } from "src/common/enums/swagger.enum";
-import { ConfirmDto, DocumentDto, MemberSearchDto, UpdateMemberDto } from "./dto/document.dto";
+import { ConfirmDto, DocumentDto, MemberSearchDto, UpdateMemberDto } from "./dto/members.dto";
 import * as moment from 'moment-jalaali';
-import { skillEnum } from "src/common/enums/skill.enum";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { memoryStorage } from "multer";
-import { Pagination } from "src/common/decorators/pagination.decorator";
-import { PaginationDto } from "src/common/dto/pagination.dto";
-import { UploadFileS3 } from "src/common/interceptors/upload-file.interceptor";
 import { toMG } from "src/common/utility/function.utils";
 import { validateFiles } from "src/common/utility/file.utils";
 

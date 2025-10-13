@@ -2,7 +2,7 @@ import { BadRequestException, ConflictException, Inject, Injectable, InternalSer
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { MemberEntity } from "./entities/members.entity";
-import { ConfirmDto, DocumentDto, MemberSearchDto, UpdateMemberDto } from "./dto/document.dto";
+import { ConfirmDto, DocumentDto, MemberSearchDto, UpdateMemberDto } from "./dto/members.dto";
 import { REQUEST } from "@nestjs/core";
 import { Request } from "express";
 import { UploadFileS3 } from "src/common/interceptors/upload-file.interceptor";
@@ -31,7 +31,7 @@ export class MembersService {
         let resumeKey : string;
         if(this.req.user.member_id) throw new ConflictException('شما قبلا ثبت نام کرده اید')
         await this.checkDocumentExist(national_code, student_number)
-        const member = this.membersRepository.create({user_id : this.req.user.id})
+        const member = this.membersRepository.create({user_id : this.req.user.user_id})
         const {id} = await this.membersRepository.save(member)
         const document = this.documentRepository.create({
             member_id : id,
@@ -44,17 +44,17 @@ export class MembersService {
             GPA
         })
         if(resume){
-            const {Location , Key} = await this.s3service.uploadFile(resume,`AIC/members/document${this.req.user.id}`)
+            const {Location , Key} = await this.s3service.uploadFile(resume,`AIC/members/document${this.req.user.member_id}`)
             resumeLocation = Location;
             resumeKey = Key;
             document.resume = {location : resumeLocation, key : resumeKey}
         }
-        const {Location : cardLocation, Key : cardKey} = await this.s3service.uploadFile(studentCard_image,`AIC/members/document${this.req.user.id}`)
+        const {Location : cardLocation, Key : cardKey} = await this.s3service.uploadFile(studentCard_image,`AIC/members/document${this.req.user.member_id}`)
         document.studentCard_image = {location : cardLocation, key : cardKey}
         await this.documentRepository.save(document)
-        const {accessToken, refreshToken} = this.authService.TokenGenerator({id : this.req.user.id, mobile : this.req.user.mobile, member_id : id, token_version : this.req.user.token_version + 1})
+        const {accessToken, refreshToken} = this.authService.TokenGenerator({user_id : this.req.user.user_id, mobile : this.req.user.mobile, member_id : id, token_version : this.req.user.token_version + 1})
         await this.membersRepository.manager.getRepository("users").update(
-            { id : this.req.user.id},
+            { id : this.req.user.user_id},
             { token_version: this.req.user.token_version + 1 }
         );
         return {
@@ -232,7 +232,7 @@ export class MembersService {
 
     async update(updateDto : UpdateMemberDto, resume : Express.Multer.File, profile_photo : Express.Multer.File) {  
     const { description, skills } = updateDto;    
-    const member = await this.findMemberById(this.req.user.id)
+    const member = await this.findMemberById(this.req.user.member_id)
 
     if(!member?.document?.id) 
         throw new NotFoundException('اطلاعات کاربر یافت نشد،')
@@ -243,11 +243,11 @@ export class MembersService {
         member.document.skills = skills
     }
     if(resume){
-        const { Key, Location } = await this.s3service.uploadFile(resume, `AIC/members/document${this.req.user.id}`)
+        const { Key, Location } = await this.s3service.uploadFile(resume, `AIC/members/document${this.req.user.member_id}`)
         member.document.resume = {location : Location, key : Key}
     }
     if(profile_photo){
-        const { Key, Location } = await this.s3service.uploadFile(profile_photo, `AIC/members/document${this.req.user.id}`)
+        const { Key, Location } = await this.s3service.uploadFile(profile_photo, `AIC/members/document${this.req.user.member_id}`)
         member.document.profile_photo = {location : Location, key : Key}
     }
 
@@ -271,7 +271,7 @@ export class MembersService {
             throw new BadRequestException('برای رد صحلاحیت باید دلیل وارد کنید')
         document.status = status;
         document.reason = reason;
-        document.reviewedById = this.req.user.id;
+        document.reviewedById = this.req.user.member_id;
         await this.documentRepository.save(document)
         return {
             message : `وضعیت کاربر به ${status} تغییر کرد`

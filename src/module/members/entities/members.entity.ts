@@ -17,6 +17,12 @@ export class MemberEntity {
     user_id
     @Column({nullable : true})
     department_id: number;
+    @Column({default : 0})
+    points: number;
+    @CreateDateColumn({type : "timestamptz"})
+    created_at: Date;
+    @UpdateDateColumn({type : "timestamptz"})
+    updated_at: Date;
     @OneToOne(() => UserEntity, (user) => user.membership, {onDelete: "CASCADE"})
     @JoinColumn({name: "user_id"})
     user: UserEntity;
@@ -34,8 +40,4 @@ export class MemberEntity {
         inverseJoinColumn: { name: 'permission_code', referencedColumnName: 'code' }
     })
     permissions: PermissionEntity[];
-    @CreateDateColumn({type : "timestamptz"})
-    created_at: Date;
-    @UpdateDateColumn({type : "timestamptz"})
-    updated_at: Date;
 }
