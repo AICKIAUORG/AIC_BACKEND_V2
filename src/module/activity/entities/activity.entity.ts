@@ -1,4 +1,5 @@
 import {
+  ActivityStatusEnum,
   ActivityType,
 } from 'src/common/enums/activity.enum';
 import {
@@ -33,10 +34,10 @@ export class ActivityEntity {
   description: string;
   @Column({
     type: 'enum',
-    enum: StatusEnum,
-    default: StatusEnum.pending,
+    enum: ActivityStatusEnum,
+    default: ActivityStatusEnum.pending,
   })
-  status: StatusEnum;
+  status: ActivityStatusEnum;
   @Column()
   points: number;
   @Column()

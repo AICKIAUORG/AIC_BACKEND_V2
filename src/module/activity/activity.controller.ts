@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ActivityService } from './activity.service';
 import { CreateActivityDto } from './dto/create-activity.dto';
 import { UpdateActivityDto } from './dto/update-activity.dto';
+import { ActivityFilterDto } from './dto/activity.dto';
 
 @Controller('activity')
 export class ActivityController {
@@ -13,8 +14,11 @@ export class ActivityController {
   }
 
   @Get()
-  findAll() {
-    return this.activityService.findAll();
+  findAll(
+    @Query() filterDto: ActivityFilterDto
+  ) {
+    const paginationDto = {limit : filterDto.limit, page : filterDto.page}
+    return this.activityService.findAll(paginationDto, filterDto);
   }
 
   @Get(':id')

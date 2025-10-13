@@ -1,7 +1,9 @@
-import { ActivityType } from "src/common/enums/activity.enum";
-import { IsEnum, IsString, IsNumber, IsOptional, IsDate, IsBoolean, IsObject, Min, Max } from "class-validator";
+import { ActivityStatusEnum, ActivityType } from "src/common/enums/activity.enum";
+import { IsEnum, IsString, IsNumber, IsOptional, IsDate, IsBoolean, IsObject, Min, Max, IsInt } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { StatusEnum } from "src/common/enums/status.enum";
+import { IsJalaliDateTime } from "src/common/decorators/date.decorator";
+import { Type } from "class-transformer";
 
 export class CreateActivityDto {
   @ApiProperty({ enum: ActivityType, description: "نوع فعالیت" })
@@ -12,10 +14,10 @@ export class CreateActivityDto {
   @IsString()
   description: string;
 
-  @ApiProperty({ description: "امتیاز تعلق گرفته", required: false, default : 0 })
+  @ApiProperty({ description: "امتیاز تعلق گرفته" })
   @IsOptional()
   @IsNumber()
-  @Min(0)
+  @Min(5,{message : "حداقل مقدار امتیاز 5 میباشد."})
   points?: number;
 
   @ApiProperty({ description: "شناسه کاربر دریافت‌کننده امتیاز" })
@@ -24,26 +26,15 @@ export class CreateActivityDto {
 }
 
 export class UpdateActivityDto {
-  @ApiProperty({ enum: StatusEnum, description: "وضعیت فعالیت", required: false })
+  @ApiProperty({ enum: ActivityStatusEnum, description: "وضعیت فعالیت", required: false })
   @IsOptional()
-  @IsEnum(StatusEnum)
-  status?: StatusEnum;
-
-  @ApiProperty({ description: "امتیاز تعلق گرفته", required: false })
-  @IsOptional()
-  @IsNumber()
-  @Min(0)
-  points?: number;
-
-  @ApiProperty({ description: "شناسه مدیر تاییدکننده", required: false })
-  @IsOptional()
-  @IsNumber()
-  approved_by?: number;
+  @IsEnum(ActivityStatusEnum)
+  status?: ActivityStatusEnum;
 
   @ApiProperty({ description: "نظرات تاییدکننده", required: false })
   @IsOptional()
   @IsString()
-  approval_notes?: string;
+  notes?: string;
 }
 
 export class ApproveActivityDto {
@@ -68,10 +59,10 @@ export class ActivityFilterDto {
   @IsEnum(ActivityType)
   activity_type?: ActivityType;
 
-  @ApiPropertyOptional({ enum: StatusEnum, description: "وضعیت فعالیت" })
+  @ApiPropertyOptional({ enum: ActivityStatusEnum, description: "وضعیت فعالیت" })
   @IsOptional()
-  @IsEnum(StatusEnum)
-  status?: StatusEnum;
+  @IsEnum(ActivityStatusEnum)
+  status?: ActivityStatusEnum;
 
   @ApiPropertyOptional({ description: "شناسه کاربر" })
   @IsOptional()
@@ -84,12 +75,40 @@ export class ActivityFilterDto {
   section_code?: number;
 
   @ApiPropertyOptional({ description: "تاریخ شروع از" })
+  @IsJalaliDateTime({ message : "تاریخ وارد شده معتبر نیست" })
   @IsOptional()
   @IsDate()
-  start_date_from?: Date;
+  from_date?: Date;
 
   @ApiPropertyOptional({ description: "تاریخ شروع تا" })
+  @IsJalaliDateTime({ message : "تاریخ وارد شده معتبر نیست" })
   @IsOptional()
   @IsDate()
-  start_date_to?: Date;
+  to_date?: Date;
+
+  @ApiPropertyOptional({ 
+    description: 'Page number (0-based)', 
+    example: 0, 
+    minimum: 0,
+    default: 0 
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'Page must be an integer' })
+  @Min(0, { message: 'Page must be 0 or greater' })
+  page?: number;
+
+  @ApiPropertyOptional({ 
+      description: 'Number of items per page', 
+      example: 10, 
+      minimum: 1,
+      maximum: 100,
+      default: 10 
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'Limit must be an integer' })
+  @Min(1, { message: 'Limit must be 1 or greater' })
+  @Max(100, { message: 'Limit cannot exceed 100' })
+  limit?: number;
 }
