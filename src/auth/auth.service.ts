@@ -124,7 +124,7 @@ export class AuthService {
       profile.mobile_verify = true
     }
     const { accessToken, refreshToken } = this.TokenGenerator({
-      id: profile?.id,
+      user_id: profile?.id,
       mobile: profile?.mobile,
       member_id : profile?.membership ? profile.membership.id : null,
       token_version : profile?.token_version + 1
@@ -151,7 +151,7 @@ export class AuthService {
     if(user && user.password && user.mobile_verify){
       if(compareSync(password, user.password)){
         const { accessToken, refreshToken } = this.TokenGenerator({
-          id: user?.id,
+          user_id: user?.id,
           mobile: user?.mobile,
           member_id : user?.membership ? user.membership.id : null,
           token_version : user?.token_version + 1
@@ -191,9 +191,9 @@ export class AuthService {
         secret: process.env.ACCESS_TOKEN_SECRET,
       });
       let user: UserEntity;
-      if (typeof payload == "object" && payload?.id) {
+      if (typeof payload == "object" && payload?.user_id) {
         
-        user = await this.userRepository.findOneBy({ id: payload.id });
+        user = await this.userRepository.findOneBy({ id: payload.user_id });
         if (!user) {
           throw new UnauthorizedException("لطفا وارد اکانت خود شوید.");
         }
@@ -220,9 +220,9 @@ export class AuthService {
         secret: process.env.REFRESH_TOKEN_SECRET,
       });
       if (verify.mobile) {
-        const { id, mobile, member_id, token_version } = verify;
-        await this.userRepository.update({id : verify.id}, {token_version : token_version + 1})
-        return this.TokenGenerator({ id, mobile , member_id, token_version : token_version + 1});
+        const { user_id, mobile, member_id, token_version } = verify;
+        await this.userRepository.update({id : verify.user_id}, {token_version : token_version + 1})
+        return this.TokenGenerator({ user_id, mobile , member_id, token_version : token_version + 1});
       }
       throw new UnauthorizedException("رفرش توکن معبر وارد کنید");
     } catch (error) {
