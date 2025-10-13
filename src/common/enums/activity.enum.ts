@@ -15,4 +15,10 @@ export enum ActivityType {
     NETWORKING_EVENT = "networking_event", // رویداد شبکه‌سازی
     KNOWLEDGE_SHARING = "knowledge_sharing" // اشتراک دانش
   }
-  
+
+export enum ActivityStatusEnum {
+  approve = "Approved",
+  pending = "Pending",
+  reject = "Rejected",
+  revoke = "Revoked"
+}
