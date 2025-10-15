@@ -1,5 +1,5 @@
-import { ActivityStatusEnum, ActivityType } from "src/common/enums/activity.enum";
-import { IsEnum, IsString, IsNumber, IsOptional, IsDate, IsBoolean, IsObject, Min, Max, IsInt } from "class-validator";
+import { ActivityStatusEnum, ActivityType, WarningTypeEnum } from "src/common/enums/activity.enum";
+import { IsEnum, IsString, IsNumber, IsOptional, IsDate, IsBoolean, IsObject, Min, Max, IsInt, isNumber } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { StatusEnum } from "src/common/enums/status.enum";
 import { IsJalaliDateTime } from "src/common/decorators/date.decorator";
@@ -15,7 +15,6 @@ export class CreateActivityDto {
   description: string;
 
   @ApiProperty({ description: "امتیاز تعلق گرفته" })
-  @IsOptional()
   @IsNumber()
   @Min(5,{message : "حداقل مقدار امتیاز 5 میباشد."})
   points?: number;
@@ -26,15 +25,27 @@ export class CreateActivityDto {
 }
 
 export class UpdateActivityDto {
-  @ApiProperty({ enum: ActivityStatusEnum, description: "وضعیت فعالیت", required: false })
-  @IsOptional()
+  @ApiProperty({ enum: ActivityStatusEnum, description: "وضعیت فعالیت" })
   @IsEnum(ActivityStatusEnum)
-  status?: ActivityStatusEnum;
+  status: ActivityStatusEnum;
 
   @ApiProperty({ description: "نظرات تاییدکننده", required: false })
   @IsOptional()
   @IsString()
   notes?: string;
+}
+export class WarningDto {
+  @ApiProperty({ description: "شناسه کاربر" })
+  @IsNumber()
+  member_id: number;
+
+  @ApiProperty({ enum: WarningTypeEnum, description: "نوع اخطار" })
+  @IsEnum(WarningTypeEnum)
+  warning_type: WarningTypeEnum;
+
+  @ApiProperty({ description: "توضیحات اخطار" })
+  @IsString()
+  notes: string;
 }
 
 export class ApproveActivityDto {
