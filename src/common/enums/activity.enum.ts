@@ -13,12 +13,23 @@ export enum ActivityType {
     CONFERENCE_PRESENTATION = "conference_presentation", // ارائه در کنفرانس
     WORKSHOP_ORGANIZATION = "workshop_organization", // سازماندهی کارگاه
     NETWORKING_EVENT = "networking_event", // رویداد شبکه‌سازی
-    KNOWLEDGE_SHARING = "knowledge_sharing" // اشتراک دانش
+    KNOWLEDGE_SHARING = "knowledge_sharing", // اشتراک دانش
   }
+
+export enum WarningTypeEnum {
+    LACK_OF_COLLABORATION = "عدم همکاری",
+    FAILURE_TO_ATTEND = "عدم حضور",
+    MISCONDUCT = "رفتار نامناسب",
+    INCOMPLETE_TASK = "انجام ناقص وظیفه",
+    VIOLATION_OF_RULES = "تخلف از قوانین",
+    LATE_SUBMISSION = "تاخیر در انجام",
+    OTHER = "سایر"
+}
 
 export enum ActivityStatusEnum {
   approve = "Approved",
   pending = "Pending",
   reject = "Rejected",
-  revoke = "Revoked"
+  revoke = "Revoked",
+  WARNING = "warning"
 }
