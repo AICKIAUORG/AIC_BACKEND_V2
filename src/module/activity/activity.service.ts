@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, Scope, Inject } fro
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, FindOptionsWhere } from 'typeorm';
 import { ActivityEntity } from './entities/activity.entity';
-import { CreateActivityDto, UpdateActivityDto, ApproveActivityDto, ActivityFilterDto } from './dto/activity.dto';
+import { CreateActivityDto, UpdateActivityDto, ApproveActivityDto, ActivityFilterDto, WarningDto } from './dto/activity.dto';
 import { ActivityStatusEnum, ActivityType } from 'src/common/enums/activity.enum';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
@@ -26,7 +26,7 @@ export class ActivityService {
   ) {}
 
   async createActivity(createActivityDto: CreateActivityDto) {
-    const { points, member_id, } = createActivityDto
+    const { points, member_id } = createActivityDto
 
     if(!await this.memberService.findMemberById(member_id)){
       throw new NotFoundException('کاربر یافت نشد.')
@@ -184,7 +184,25 @@ export class ActivityService {
       message : "امتیاز به کاریر تعلق گرفت."
     };
   }
+  
+  async CreateWarning(warningDto: WarningDto) {
+    const { notes, member_id, warning_type } = warningDto;
+    const activity = this.activityRepository.create({
+      title : "اخطار",
+      activity_type : warning_type,
+      description : notes,
+      member_id,
+      section_code : 100,
+      approved_by : this.req.user.member_id,
+      status: ActivityStatusEnum.WARNING
+    });
 
+    await this.activityRepository.save(activity);
+
+    return {
+      message : "اخطار به کاربر تعلق گرفت."
+    }
+  }
   async revokeActivity(id: number) {
     const activity = await this.findActivityById(id);
     

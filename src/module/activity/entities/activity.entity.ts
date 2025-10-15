@@ -1,6 +1,7 @@
 import {
   ActivityStatusEnum,
   ActivityType,
+  WarningTypeEnum,
 } from 'src/common/enums/activity.enum';
 import {
   Column,
@@ -25,9 +26,9 @@ export class ActivityEntity {
   title : string
   @Column({
     type: 'enum',
-    enum: ActivityType,
+    enum: [...Object.values(ActivityType), ...Object.values(WarningTypeEnum)],
   })
-  activity_type: ActivityType;
+  activity_type: string;
   @Column({
     type: 'text',
   })
@@ -38,7 +39,7 @@ export class ActivityEntity {
     default: ActivityStatusEnum.pending,
   })
   status: ActivityStatusEnum;
-  @Column()
+  @Column({ nullable : true })
   points: number;
   @Column()
   member_id: number;
