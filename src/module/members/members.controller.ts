@@ -18,67 +18,66 @@ export class MembersController {
     @Get("/search")
     @ApiOperation({
         summary: "Search members",
-        description: "Search and filter members with various options",
+        description: "Search and filter members with various options"
     })
     @ApiResponse({
         status: 200,
-        description: "When members are found",
+        description: "Members found successfully",
         schema: {
-        example: {
-            pagination: {
-            total_count: 25,
-            page: 0,
-            limit: 10,
-            skip: 0,
-            },
-            members: [
-            {
-                member_id: 1,
-                user_id: 1,
-                document_id: 1,
-                first_name: "پویا",
-                last_name: "عباداللهی",
-                mobile: "09196715197",
-                student_number: "401234567",
-                national_code: "1234567890",
-                document_status: "pending"
-            },
-            {
-                member_id: 2,
-                user_id: 2,
-                document_id: 2,
-                first_name: "علی",
-                last_name: "احمدی",
-                mobile: "09123456789",
-                student_number: "401234568",
-                national_code: "1234567891",
-                document_status: "accepted"
+            type: 'object',
+            properties: {
+                pagination: {
+                    type: 'object',
+                    properties: {
+                        total_count: { type: 'number', example: 25 },
+                        page: { type: 'number', example: 0 },
+                        limit: { type: 'number', example: 10 },
+                        skip: { type: 'number', example: 0 }
+                    }
+                },
+                members: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            member_id: { type: 'number', example: 1 },
+                            user_id: { type: 'number', example: 1 },
+                            document_id: { type: 'number', example: 1 },
+                            first_name: { type: 'string', example: 'پویا' },
+                            last_name: { type: 'string', example: 'عباداللهی' },
+                            mobile: { type: 'string', example: '09196715197' },
+                            student_number: { type: 'string', example: '401234567' },
+                            national_code: { type: 'string', example: '1234567890' },
+                            document_status: { type: 'string', example: 'pending' }
+                        }
+                    }
+                }
             }
-            ],
-        },
-        },
+        }
     })
     @ApiResponse({
         status: 400,
-        description: "When input parameters are invalid",
+        description: "Invalid input parameters",
         schema: {
-        example: {
-            message: "تعداد کاراکتر های سرچ نمیتواند کمتر از ۳ کاراکتر باشد.",
-            error: "Bad Request",
-            statusCode: 400,
-        },
-        },
+            type: 'object',
+            properties: {
+                message: { type: 'string', example: 'تعداد کاراکتر های سرچ نمیتواند کمتر از ۳ کاراکتر باشد.' },
+                error: { type: 'string', example: 'Bad Request' },
+                statusCode: { type: 'number', example: 400 }
+            }
+        }
     })
     @ApiResponse({
         status: 404,
-        description: "When no results are found",
+        description: "No results found",
         schema: {
-        example: {
-            message: "نتیحه ای یافت نشد.",
-            error: "Not Found",
-            statusCode: 404,
-        },
-        },
+            type: 'object',
+            properties: {
+                message: { type: 'string', example: 'نتیحه ای یافت نشد.' },
+                error: { type: 'string', example: 'Not Found' },
+                statusCode: { type: 'number', example: 404 }
+            }
+        }
     })
     find(
         @Query() searchDto: MemberSearchDto
@@ -90,48 +89,59 @@ export class MembersController {
     @Get("document")
     @ApiOperation({
         summary: "Get document by ID",
-        description: "Get document details by document ID",
+        description: "Get document details by document ID"
     })
     @ApiResponse({
         status: 200,
-        description: "When document is found",
+        description: "Document found successfully",
         schema: {
-        example: {
-            id: 1,
-            member_id: 1,
-            national_code: "1234567890",
-            student_number: "401234567",
-            skills: ["programming", "design"],
-            description: "توضیحات کاربر",
-            entry_year: 1402,
-            gender: "male",
-            GPA: 18.5,
-            status: "pending",
-            resume: {
-                location: "https://example.com/resume.pdf",
-                key: "AIC/members/document1/resume.pdf"
-            },
-            studentCard_image: {
-                location: "https://example.com/card.jpg",
-                key: "AIC/members/document1/card.jpg"
-            },
-            reviewedBy: {
-                first_name: "مدیر",
-                last_name: "سیستم"
+            type: 'object',
+            properties: {
+                id: { type: 'number', example: 1 },
+                member_id: { type: 'number', example: 1 },
+                national_code: { type: 'string', example: '1234567890' },
+                student_number: { type: 'string', example: '401234567' },
+                skills: { type: 'array', items: { type: 'string' }, example: ['programming', 'design'] },
+                description: { type: 'string', example: 'توضیحات کاربر' },
+                entry_year: { type: 'number', example: 1402 },
+                gender: { type: 'string', example: 'male' },
+                GPA: { type: 'number', example: 18.5 },
+                status: { type: 'string', example: 'pending' },
+                resume: {
+                    type: 'object',
+                    properties: {
+                        location: { type: 'string', example: 'https://example.com/resume.pdf' },
+                        key: { type: 'string', example: 'AIC/members/document1/resume.pdf' }
+                    }
+                },
+                studentCard_image: {
+                    type: 'object',
+                    properties: {
+                        location: { type: 'string', example: 'https://example.com/card.jpg' },
+                        key: { type: 'string', example: 'AIC/members/document1/card.jpg' }
+                    }
+                },
+                reviewedBy: {
+                    type: 'object',
+                    properties: {
+                        first_name: { type: 'string', example: 'مدیر' },
+                        last_name: { type: 'string', example: 'سیستم' }
+                    }
+                }
             }
-        },
-        },
+        }
     })
     @ApiResponse({
         status: 404,
-        description: "When document is not found",
+        description: "Document not found",
         schema: {
-        example: {
-            message: "کاربر یافت نشد",
-            error: "Not Found",
-            statusCode: 404,
-        },
-        },
+            type: 'object',
+            properties: {
+                message: { type: 'string', example: 'کاربر یافت نشد' },
+                error: { type: 'string', example: 'Not Found' },
+                statusCode: { type: 'number', example: 404 }
+            }
+        }
     })
     getDocument(
         @Query('document_id') document_id: string
@@ -142,52 +152,70 @@ export class MembersController {
     @Get("member")
     @ApiOperation({
         summary: "Get member by ID",
-        description: "Get member details with relations by member ID",
+        description: "Get member details with relations by member ID"
     })
     @ApiResponse({
         status: 200,
-        description: "When member is found",
+        description: "Member found successfully",
         schema: {
-        example: {
-            id: 1,
-            user_id: 1,
-            created_at: "1402/10/29 00:21",
-            updated_at: "1402/10/29 00:21",
-            user: {
-                first_name: "پویا",
-                last_name: "عباداللهی"
-            },
-            role: {
-                code: "MEMBER",
-                role: "عضو"
-            },
-            department: {
-                id: 1,
-                name: "برنامه‌نویسی"
-            },
-            document: {
-                id: 1,
-                status: "pending"
-            },
-            permissions: [
-                {
-                    code: "READ",
-                    access: true
+            type: 'object',
+            properties: {
+                id: { type: 'number', example: 1 },
+                user_id: { type: 'number', example: 1 },
+                created_at: { type: 'string', example: '1404/07/24 19:44' },
+                updated_at: { type: 'string', example: '1404/07/24 19:44' },
+                user: {
+                    type: 'object',
+                    properties: {
+                        first_name: { type: 'string', example: 'پویا' },
+                        last_name: { type: 'string', example: 'عباداللهی' }
+                    }
+                },
+                role: {
+                    type: 'object',
+                    properties: {
+                        code: { type: 'string', example: 'MEMBER' },
+                        role: { type: 'string', example: 'عضو' }
+                    }
+                },
+                department: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'number', example: 1 },
+                        name: { type: 'string', example: 'برنامه‌نویسی' }
+                    }
+                },
+                document: {
+                    type: 'object',
+                    properties: {
+                        id: { type: 'number', example: 1 },
+                        status: { type: 'string', example: 'pending' }
+                    }
+                },
+                permissions: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {
+                            code: { type: 'string', example: 'READ' },
+                            access: { type: 'boolean', example: true }
+                        }
+                    }
                 }
-            ]
-        },
-        },
+            }
+        }
     })
     @ApiResponse({
         status: 404,
-        description: "When member is not found",
+        description: "Member not found",
         schema: {
-        example: {
-            message: "کاربر یافت نشد",
-            error: "Not Found",
-            statusCode: 404,
-        },
-        },
+            type: 'object',
+            properties: {
+                message: { type: 'string', example: 'کاربر یافت نشد' },
+                error: { type: 'string', example: 'Not Found' },
+                statusCode: { type: 'number', example: 404 }
+            }
+        }
     })
     getMember(
         @Query('member_id') member_id: string
@@ -197,40 +225,46 @@ export class MembersController {
 
 
     @UserAuth()
-    @ApiOperation({ summary: 'Register new member', description: 'Register new member with required file uploads' })
+    @ApiOperation({ 
+        summary: 'Register new member', 
+        description: 'Register new member with required file uploads' 
+    })
     @ApiConsumes(SwaggerEnums.Multipart)
     @ApiResponse({
         status: 200,
-        description: "When member registration is successful",
+        description: "Member registration successful",
         schema: {
-            example: {
-                "message": "member submitted successfully",
-                "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywibW9iaWxlIjoiMDkxOTY3MTUxOTciLCJtZW1iZXJzaGlwIjp0cnVlLCJ0b2tlbl92ZXJzaW9uIjo1LCJpYXQiOjE3NTUwOTY1NDUsImV4cCI6MTc1NzY4ODU0NX0.Wc_pZG5NSUNRWmus1I9FGd9KCBV9J9kmxafqhzfMOSM",
-                "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywibW9iaWxlIjoiMDkxOTY3MTUxOTciLCJtZW1iZXJzaGlwIjp0cnVlLCJ0b2tlbl92ZXJzaW9uIjo1LCJpYXQiOjE3NTUwOTY1NDUsImV4cCI6MTc4NjY1NDE0NX0.88GYm5YqgqT7e-r1g1S33mc8EV46DZ1EPsO5hywbW6k"
-            },
-        },
-    })
-    @ApiResponse({
-    status: 409,
-    description: "When user has already submitted registration",
-    schema: {
-        example: {
-            "message": "شما قبلا ثبت نام کرده اید",
-            "error": "Conflict",
-            "statusCode": 409
-        },
-    },
+            type: 'object',
+            properties: {
+                message: { type: 'string', example: 'member submitted successfully' },
+                accessToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
+                refreshToken: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' }
+            }
+        }
     })
     @ApiResponse({
         status: 409,
-        description: "When national code or student number already exists",
+        description: "User has already submitted registration",
         schema: {
-            example: {
-                "message": "کاربر با این کد ملی قبلا ثبت نام کرده است",
-                "error": "Conflict",
-                "statusCode": 409
-            },
-        },
+            type: 'object',
+            properties: {
+                message: { type: 'string', example: 'شما قبلا ثبت نام کرده اید' },
+                error: { type: 'string', example: 'Conflict' },
+                statusCode: { type: 'number', example: 409 }
+            }
+        }
+    })
+    @ApiResponse({
+        status: 409,
+        description: "National code or student number already exists",
+        schema: {
+            type: 'object',
+            properties: {
+                message: { type: 'string', example: 'کاربر با این کد ملی قبلا ثبت نام کرده است' },
+                error: { type: 'string', example: 'Conflict' },
+                statusCode: { type: 'number', example: 409 }
+            }
+        }
     })
     @ApiBody({
         type: DocumentDto,
@@ -272,27 +306,32 @@ export class MembersController {
     }
 
     @UserAuth()
-    @ApiOperation({ summary: 'Update member', description: 'Update member information and files' })
+    @ApiOperation({ 
+        summary: 'Update member', 
+        description: 'Update member information and files' 
+    })
     @ApiConsumes(SwaggerEnums.Multipart)
     @ApiResponse({
         status: 200,
-        description: "When member update is successful",
+        description: "Member update successful",
         schema: {
-            example: {
-                "message": "اطلاعات کاربر با موفقیت اپدیت شد."
-            },
-        },
+            type: 'object',
+            properties: {
+                message: { type: 'string', example: 'اطلاعات کاربر با موفقیت اپدیت شد.' }
+            }
+        }
     })
     @ApiResponse({
         status: 404,
-        description: "When member document is not found",
+        description: "Member document not found",
         schema: {
-            example: {
-                "message": "اطلاعات کاربر یافت نشد،",
-                "error": "Not Found",
-                "statusCode": 404
-            },
-        },
+            type: 'object',
+            properties: {
+                message: { type: 'string', example: 'اطلاعات کاربر یافت نشد،' },
+                error: { type: 'string', example: 'Not Found' },
+                statusCode: { type: 'number', example: 404 }
+            }
+        }
     })
     @ApiBody({
         type: UpdateMemberDto,
@@ -325,47 +364,54 @@ export class MembersController {
     }
 
     @UserAuth()
-    @ApiOperation({ summary: 'Confirm/Reject member document', description: 'Change status of member document' })
+    @ApiOperation({ 
+        summary: 'Confirm/Reject member document', 
+        description: 'Change status of member document' 
+    })
     @ApiConsumes(SwaggerEnums.UrlEncoded)
     @ApiResponse({
         status: 200,
-        description: "When status change is successful",
+        description: "Status change successful",
         schema: {
-            example: {
-                "message": "وضعیت کاربر به accepted تغییر کرد"
-            },
-        },
+            type: 'object',
+            properties: {
+                message: { type: 'string', example: 'وضعیت کاربر به accepted تغییر کرد' }
+            }
+        }
     })
     @ApiResponse({
         status: 200,
-        description: "When status is already the same",
+        description: "Status is already the same",
         schema: {
-            example: {
-                "message": "وضعیت داکیومنت pending میباشد"
-            },
-        },
+            type: 'object',
+            properties: {
+                message: { type: 'string', example: 'وضعیت داکیومنت pending میباشد' }
+            }
+        }
     })
     @ApiResponse({
         status: 400,
-        description: "When reject status is provided without reason",
+        description: "Reject status provided without reason",
         schema: {
-            example: {
-                "message": "برای رد صحلاحیت باید دلیل وارد کنید",
-                "error": "Bad Request",
-                "statusCode": 400
-            },
-        },
+            type: 'object',
+            properties: {
+                message: { type: 'string', example: 'برای رد صحلاحیت باید دلیل وارد کنید' },
+                error: { type: 'string', example: 'Bad Request' },
+                statusCode: { type: 'number', example: 400 }
+            }
+        }
     })
     @ApiResponse({
         status: 404,
-        description: "When document is not found",
+        description: "Document not found",
         schema: {
-            example: {
-                "message": "داده ای یافت نشد.",
-                "error": "Not Found",
-                "statusCode": 404
-            },
-        },
+            type: 'object',
+            properties: {
+                message: { type: 'string', example: 'داده ای یافت نشد.' },
+                error: { type: 'string', example: 'Not Found' },
+                statusCode: { type: 'number', example: 404 }
+            }
+        }
     })
     @Patch()
     confirm(
