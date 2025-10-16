@@ -14,7 +14,7 @@ export class MemberEntity {
     @PrimaryGeneratedColumn()
     id: number;
     @Column()
-    user_id
+    user_id : number;
     @Column({nullable : true})
     department_id: number;
     @Column({default : 0})
