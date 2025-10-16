@@ -11,6 +11,7 @@ import { UsersModule } from '../users/users.module';
 import { CommissionsModule } from '../commissions/commissions.module';
 import { DepartmentsModule } from '../departments/departments.module';
 import { AdminModule } from 'src/admin/admin.module';
+import { ActivityModule } from '../activity/activity.module';
 
 @Module({
   imports: [
@@ -28,7 +29,8 @@ import { AdminModule } from 'src/admin/admin.module';
   UsersModule,
   CommissionsModule,
   DepartmentsModule,
-  AdminModule
+  AdminModule,
+  ActivityModule
 ],
   controllers: [],
   providers: [
