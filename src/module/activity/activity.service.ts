@@ -16,7 +16,7 @@ import { AdminEntity } from 'src/admin/entities/admin.entity';
 @Injectable({ scope : Scope.REQUEST })
 export class ActivityService {
   constructor(
-    @Inject(REQUEST)
+    @Inject(REQUEST) 
     private req : Request,
     @InjectRepository(ActivityEntity)
     private activityRepository: Repository<ActivityEntity>,
@@ -144,18 +144,6 @@ export class ActivityService {
       created_at: DateConvertor(activity.created_at, false)
     };
   }
-
-  // async updateActivity(id: number, updateActivityDto: UpdateActivityDto): Promise<ActivityEntity> {
-  //   const activity = await this.findActivityById(id);
-
-  //   // اگر وضعیت تغییر کرده و به تایید شده تبدیل شده، امتیازات را بروزرسانی کن
-  //   if (updateActivityDto.status === ActivityStatus.APPROVED && activity.status !== ActivityStatus.APPROVED) {
-  //     await this.updateUserScoreSummary(activity.user_id, activity.points);
-  //   }
-
-  //   Object.assign(activity, updateActivityDto);
-  //   return await this.activityRepository.save(activity);
-  // }
 
   async updateMemberPoints(member_id : number, points : number){
     const member = await this.memberRepository.findOneBy({id : member_id})
