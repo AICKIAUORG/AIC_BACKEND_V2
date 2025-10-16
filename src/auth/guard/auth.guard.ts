@@ -26,7 +26,6 @@ export class AuthGuard implements CanActivate {
     const request: Request = httpRequest.getRequest<Request>();
     const token = this.extractToken(request);
     request.user = await this.authService.validateAccessToken(token);
-    console.log(request.user.member_id);
     if ((requiredRole && requiredRole.length > 0) || (requiredPermission && requiredPermission.length > 0)) {
       const access = await this.adminService.checkAccess(request.user.member_id, requiredRole, requiredPermission);
       if (access) {
