@@ -22,7 +22,7 @@ export class CommissionsService {
     if(await this.commissionRepository.findOne({
       where : [
         {name},
-        {role_code : code}
+        {code}
       ]
     })){
       throw new ConflictException('این شناسه وجود دارد.')
@@ -34,7 +34,7 @@ export class CommissionsService {
     const { code : role_code } = await this.adminRepository.save(role)
     const commission = this.commissionRepository.create({
       name,
-      role_code
+      code : role_code
     })
     await this.commissionRepository.save(commission)
     return {
@@ -124,7 +124,7 @@ export class CommissionsService {
 
     commission.name = new_name
     await this.commissionRepository.save(commission)
-    await this.adminRepository.update({code : commission.role_code}, {
+    await this.adminRepository.update({code : commission.code}, {
       role : new_name
     })
     return {
@@ -140,9 +140,9 @@ export class CommissionsService {
   }
 
   async remove(id: number) {
-    const { role_code } = await this.checkExist(id)
+    const { code } = await this.checkExist(id)
     await this.commissionRepository.delete({id})
-    await this.adminRepository.delete({code : role_code})
+    await this.adminRepository.delete({code : code})
     return {
       message : "کمیسیون با موفقیت حذف شد"
     }
