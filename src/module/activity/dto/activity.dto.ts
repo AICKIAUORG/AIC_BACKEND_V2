@@ -1,5 +1,5 @@
 import { ActivityStatusEnum, ActivityType, WarningTypeEnum } from "src/common/enums/activity.enum";
-import { IsEnum, IsString, IsNumber, IsOptional, IsDate, IsBoolean, IsObject, Min, Max, IsInt, isNumber } from "class-validator";
+import { IsEnum, IsString, IsNumber, IsOptional, IsDate, IsBoolean, IsObject, Min, Max, IsInt, isNumber, isString } from "class-validator";
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { StatusEnum } from "src/common/enums/status.enum";
 import { IsJalaliDateTime } from "src/common/decorators/date.decorator";
@@ -24,9 +24,9 @@ export class CreateActivityDto {
   member_id: number;
 }
 
-export class UpdateActivityDto {
-  @ApiProperty({ enum: ActivityStatusEnum, description: "وضعیت فعالیت" })
-  @IsEnum(ActivityStatusEnum)
+export class ChangeActivityStatusDto {
+  @ApiProperty({ enum: [ActivityStatusEnum.approve, ActivityStatusEnum.reject], description: "وضعیت فعالیت" })
+  @IsString()
   status: ActivityStatusEnum;
 
   @ApiProperty({ description: "نظرات تاییدکننده", required: false })
@@ -65,10 +65,9 @@ export class ApproveActivityDto {
 }
 
 export class ActivityFilterDto {
-  @ApiPropertyOptional({ enum: ActivityType, description: "نوع فعالیت" })
+  @ApiPropertyOptional({ enum: [...Object.values(ActivityType), ...Object.values(WarningTypeEnum)], description: "نوع فعالیت" })
   @IsOptional()
-  @IsEnum(ActivityType)
-  activity_type?: ActivityType;
+  activity_type?: string;
 
   @ApiPropertyOptional({ enum: ActivityStatusEnum, description: "وضعیت فعالیت" })
   @IsOptional()

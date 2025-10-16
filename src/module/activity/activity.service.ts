@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, Scope, Inject } fro
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, FindOptionsWhere } from 'typeorm';
 import { ActivityEntity } from './entities/activity.entity';
-import { CreateActivityDto, UpdateActivityDto, ApproveActivityDto, ActivityFilterDto, WarningDto } from './dto/activity.dto';
+import { CreateActivityDto, ApproveActivityDto, ActivityFilterDto, WarningDto, ChangeActivityStatusDto } from './dto/activity.dto';
 import { ActivityStatusEnum, ActivityType } from 'src/common/enums/activity.enum';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
@@ -11,6 +11,7 @@ import { MembersService } from '../members/members.service';
 import { DateConvertor, PaginationGenerator, paginationSolver } from 'src/common/utility/function.utils';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { MemberEntity } from '../members/entities/members.entity';
+import { AdminEntity } from 'src/admin/entities/admin.entity';
 
 @Injectable({ scope : Scope.REQUEST })
 export class ActivityService {
@@ -19,6 +20,8 @@ export class ActivityService {
     private req : Request,
     @InjectRepository(ActivityEntity)
     private activityRepository: Repository<ActivityEntity>,
+    @InjectRepository(AdminEntity)
+    private adminRepository: Repository<AdminEntity>,
     @InjectRepository(MemberEntity)
     private memberRepository: Repository<MemberEntity>,
     private adminService : AdminService,
@@ -31,18 +34,24 @@ export class ActivityService {
     if(!await this.memberService.findMemberById(member_id)){
       throw new NotFoundException('کاربر یافت نشد.')
     }
+    const { code } = await this.adminRepository.findOneBy({member_id : this.req.user.member_id})
+    const isAdmin = code > 100 && code < 200;
 
-    const access = await this.adminService.checkAccess(this.req.user.member_id, [100], [])
-    if(!access && points > 30){
+    if(!isAdmin && points > 30){
       throw new BadRequestException('حداکثر امتیاز ۳۰ میباشد.')
     }
-    
     const activity = this.activityRepository.create({
       ...createActivityDto,
-      status: access ? ActivityStatusEnum.approve : ActivityStatusEnum.pending,
+      section_code : code,
+      status: isAdmin ? ActivityStatusEnum.approve : ActivityStatusEnum.pending,
     });
-
-    return await this.activityRepository.save(activity);
+    if(isAdmin){
+      await this.updateMemberPoints(member_id, points)
+    }
+    await this.activityRepository.save(activity);
+    return {
+      message : isAdmin ? "امتیاز به کاربر تعلق گرفت." : "فعالیت ثبت و در انتظار تایید قرار گرفت."
+    }
   }
 
   async findAllActivities(paginationDto: PaginationDto, filterDto?: ActivityFilterDto) {
@@ -64,59 +73,41 @@ export class ActivityService {
     }
 
     const query = this.activityRepository.createQueryBuilder('activities')
-      .leftJoinAndSelect('activities.member.user', 'member')
+      .leftJoinAndSelect('activities.member', 'member')
+      .leftJoinAndSelect('member.user', 'user')
       .leftJoinAndSelect('activities.approver', 'approver')
+      .leftJoinAndSelect('approver.user', 'approverUser')
       .where(where);
 
-      if (
-        to_date &&
-        from_date
-      ) {
-        const to = new Date(DateConvertor(to_date))
-        const from = new Date(DateConvertor(from_date))
-        query.andWhere("activities.created_at BETWEEN :from AND :to", { from, to });
-      } else if (from_date) {
-        const from = new Date(DateConvertor(from_date))
-        query.andWhere("activities.created_at >= :from", { from });
-      } else if (to_date) {
-        const to = new Date(DateConvertor(to_date))
-        query.andWhere("activities.created_at <= :to", { to });
-      }
-    query.select([
-        "activities.id",
-        "activities.title",
-        "activities.activity_type",
-        "activities.description",
-        "activities.status",
-        "activities.points",
-        "activities.member_id",
-        "member.first_name",
-        "member.last_name",
-        "activities.section_code",
-        "activities.approved_by",
-        "approver.first_name",
-        "approver.last_name",
-        "activities.approved_at",
-        "activities.approval_notes",
-        "activities.created_at",
-    ])
+    if (to_date && from_date) {
+      const to = new Date(DateConvertor(to_date))
+      const from = new Date(DateConvertor(from_date))
+      query.andWhere("activities.created_at BETWEEN :from AND :to", { from, to });
+    } else if (from_date) {
+      const from = new Date(DateConvertor(from_date))
+      query.andWhere("activities.created_at >= :from", { from });
+    } else if (to_date) {
+      const to = new Date(DateConvertor(to_date))
+      query.andWhere("activities.created_at <= :to", { to });
+    }
+
     query.take(limit);
     query.skip(skip);
-    query.orderBy("members.created_at", "DESC");
+    query.orderBy("activities.created_at", "DESC");
+    
     const [activities, count] = await query.getManyAndCount();
     if (activities.length == 0) throw new NotFoundException("نتیحه ای یافت نشد.");
     const simplifiedActivities = activities.map(activity => ({
         id: activity.id,
-        title: activity.title,
         activity_type: activity.activity_type,
         description: activity.description,
         status: activity.status,
         points: activity.points,
         member_id: activity.member_id,
-        member_fullName : `${activity.member.user.first_name} ${activity.member.user.last_name}`,
+        member_fullName : `${activity.member?.user?.first_name || ''} ${activity.member?.user?.last_name || ''}`,
         section_code: activity.section_code,
         approved_by: activity.approved_by,
-        approver_fullName : `${activity.approver.user.first_name} ${activity.approver.user.last_name}`,
+        approver_fullName : `${activity.approver?.user?.first_name || ''} ${activity.approver?.user?.last_name || ''}`,
         approved_at: activity.approved_at,
         approval_notes: activity.approval_notes,
         created_at: DateConvertor(activity.created_at, false)
@@ -128,16 +119,30 @@ export class ActivityService {
     };
   }
 
-  async findActivityById(id: number): Promise<ActivityEntity> {
+  async findActivityById(id: number) {
     const activity = await this.activityRepository.findOne({
       where: { id },
-      relations: ['member', 'approver'],
+      relations: ['member.user', 'approver.user'],
     });
 
     if (!activity) {
       throw new NotFoundException('فعالیت یافت نشد');
     }
-    return activity;
+    return {
+      id: activity.id,
+      activity_type: activity.activity_type,
+      description: activity.description,
+      status: activity.status,
+      points: activity.points,
+      member_id: activity.member_id,
+      member_fullName : `${activity.member?.user?.first_name || ''} ${activity.member?.user?.last_name || ''}`,
+      section_code: activity.section_code,
+      approved_by: activity.approved_by,
+      approver_fullName : `${activity.approver?.user?.first_name || ''} ${activity.approver?.user?.last_name || ''}`,
+      approved_at: activity.approved_at,
+      approval_notes: activity.approval_notes,
+      created_at: DateConvertor(activity.created_at, false)
+    };
   }
 
   // async updateActivity(id: number, updateActivityDto: UpdateActivityDto): Promise<ActivityEntity> {
@@ -160,13 +165,14 @@ export class ActivityService {
     await this.memberRepository.save(member)
     return true
   }
-  async updateActivity(id: number, updateActivityDto: UpdateActivityDto) {
-    const activity = await this.findActivityById(id);
-    const { notes, status } = updateActivityDto;
+  async changeActivityStatus(id: number, changeActivityStatus: ChangeActivityStatusDto) {
+    const activity = await this.activityRepository.findOneBy({ id });
+    const { notes, status } = changeActivityStatus;
 
-    if (activity.status === ActivityStatusEnum.approve) {
-      throw new BadRequestException('فعالیت قبلاً تایید شده است');
+    if (activity.status !== ActivityStatusEnum.pending) {
+      throw new BadRequestException('فعالیت قبلا تعیین وضعیت شده است');
     }
+
     activity.status = status;
     activity.approved_by = this.req.user.member_id
     activity.approved_at = new Date();
@@ -175,11 +181,8 @@ export class ActivityService {
     if(notes) 
       activity.approval_notes = notes;
 
-    await Promise.all([
-      this.activityRepository.save(activity),
-      this.updateMemberPoints(activity.member_id, activity.points)
-    ])
-
+    await this.activityRepository.save(activity);
+    await this.updateMemberPoints(activity.member_id, activity.points);
     return {
       message : "امتیاز به کاریر تعلق گرفت."
     };
@@ -188,7 +191,6 @@ export class ActivityService {
   async CreateWarning(warningDto: WarningDto) {
     const { notes, member_id, warning_type } = warningDto;
     const activity = this.activityRepository.create({
-      title : "اخطار",
       activity_type : warning_type,
       description : notes,
       member_id,
@@ -204,7 +206,7 @@ export class ActivityService {
     }
   }
   async revokeActivity(id: number) {
-    const activity = await this.findActivityById(id);
+    const activity = await this.activityRepository.findOneBy({ id });
     
     if(activity.status !== ActivityStatusEnum.approve)
       throw new BadRequestException('فقط فعالیت های تایید شده قابل یازپس گیری هستند.')
@@ -213,60 +215,97 @@ export class ActivityService {
     activity.approved_at = new Date();
     activity.approval_notes = null;
 
-    await Promise.all([
-      this.activityRepository.save(activity),
-      this.updateMemberPoints(activity.member_id, -activity.points)
-    ])
-
+    await this.activityRepository.save(activity);
+    await this.updateMemberPoints(activity.member_id, -activity.points);
     return {
       message : "امتیاز کاریر بازپس گرفته شد."
     };
   }
 
-  async getUserActivities(userId: number): Promise<ActivityEntity[]> {
-    return await this.activityRepository.find({
-      where: { user_id: userId },
-      relations: ['department', 'commission', 'approver'],
-      order: { created_at: 'DESC' },
-    });
+  async getUserActivities(member_id: number) {
+    const statuses = [
+      ActivityStatusEnum.approve,
+      ActivityStatusEnum.pending,
+      ActivityStatusEnum.WARNING 
+    ];
+
+    const activities = await this.activityRepository
+      .createQueryBuilder('activity')
+      .where('activity.member_id = :member_id', { member_id })
+      .andWhere('activity.status IN (:...statuses)', { statuses })
+      .orderBy('activity.created_at', 'DESC')
+      .getMany();
+
+    const groupedActivities = activities.reduce((acc, activity) => {
+      const status = activity.status;
+      if (!acc[status]) {
+        acc[status] = [];
+      }
+      acc[status].push({
+        id: activity.id,
+        activity_type: activity.activity_type,
+        description: activity.description,
+        status: activity.status,
+        points: activity.points,
+        section_code: activity.section_code,
+        created_at: DateConvertor(activity.created_at, false)
+      });
+      return acc;
+    }, {});
+
+    const result = Object.keys(groupedActivities).map(status => ({
+      status,
+      activities: groupedActivities[status]
+    }));
+
+    return result;
   }
 
-  async getTopUsers(limit: number = 10): Promise<UserScoreSummaryEntity[]> {
-    return await this.userScoreSummaryRepository.find({
-      relations: ['user'],
-      order: { total_points: 'DESC' },
-      take: limit,
-    });
-  }
-
-  async getActivityStatistics(): Promise<any> {
-    const totalActivities = await this.activityRepository.count();
-    const approvedActivities = await this.activityRepository.count({
-      where: { status: ActivityStatus.APPROVED },
-    });
-    const pendingActivities = await this.activityRepository.count({
-      where: { status: ActivityStatus.PENDING },
-    });
-
-    const totalPoints = await this.activityRepository
+  async getTopUsers(limit: number = 10) {
+    const topUsers = await this.activityRepository
       .createQueryBuilder('activity')
-      .select('SUM(activity.points)', 'total')
-      .where('activity.status = :status', { status: ActivityStatus.APPROVED })
-      .getRawOne();
-
-    const activitiesByType = await this.activityRepository
-      .createQueryBuilder('activity')
-      .select('activity.activity_type', 'type')
-      .addSelect('COUNT(*)', 'count')
-      .groupBy('activity.activity_type')
+      .innerJoinAndSelect('activity.member', 'member')
+      .innerJoinAndSelect('member.user', 'user')
+      .select('activity.member_id', 'member_id')
+      .addSelect("CONCAT(user.first_name, ' ', user.last_name)", 'full_name')
+      .addSelect('SUM(activity.points)', 'total_points')
+      .groupBy('activity.member_id')
+      .addGroupBy('member.id')
+      .addGroupBy('full_name')
+      .orderBy('total_points', 'DESC')
+      .limit(limit)
       .getRawMany();
 
+    return topUsers;
+  }
+
+  async getActivityStatistics(member_id : number) {
+    const approvedActivities = await this.activityRepository.count({
+      where: [
+        { member_id, status: ActivityStatusEnum.approve }
+      ]
+    })
+    const rejectedActivities = await this.activityRepository.count({
+      where: [
+        { member_id, status: ActivityStatusEnum.reject },
+        { member_id, status: ActivityStatusEnum.revoke }
+      ],
+    });
+    const warnings = await this.activityRepository.count({
+      where: [
+        { member_id, status: ActivityStatusEnum.WARNING }
+      ]
+    });
+    const pendingActivities = await this.activityRepository.count({
+      where: [
+        { member_id, status: ActivityStatusEnum.pending }
+      ]
+    });
     return {
-      totalActivities,
-      approvedActivities,
       pendingActivities,
-      totalPoints: parseInt(totalPoints.total) || 0,
-      activitiesByType,
+      approvedActivities,
+      rejectedActivities,
+      warnings
     };
   }
 }

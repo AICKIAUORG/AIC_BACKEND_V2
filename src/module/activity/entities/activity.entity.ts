@@ -22,8 +22,6 @@ import { MemberEntity } from 'src/module/members/entities/members.entity';
 export class ActivityEntity {
   @PrimaryGeneratedColumn()
   id: number;
-  @Column()
-  title : string
   @Column({
     type: 'enum',
     enum: [...Object.values(ActivityType), ...Object.values(WarningTypeEnum)],
