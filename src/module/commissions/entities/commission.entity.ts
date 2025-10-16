@@ -19,9 +19,9 @@ export class CommissionEntity {
   @Column()
   name: string;
   @Column()
-  role_code: number;
+  code: number;
   @OneToOne(() => AdminEntity)
-  @JoinColumn({ name: 'role_code' })
+  @JoinColumn({ name: 'code' })
   role: AdminEntity;
   @OneToMany(() => DepartmentEntity, (department) => department.commission, {
     nullable: true,
