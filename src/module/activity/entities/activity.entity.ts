@@ -46,7 +46,7 @@ export class ActivityEntity {
   @Column({ nullable: true })
   approved_by: number;
   @Column({
-    type: 'timestamp',
+    type: 'timestamptz',
     nullable: true,
   })
   approved_at: Date;

@@ -44,11 +44,14 @@ export class ActivityService {
       ...createActivityDto,
       section_code : code,
       status: isAdmin ? ActivityStatusEnum.approve : ActivityStatusEnum.pending,
+      approved_at : isAdmin ? new Date() : null
     });
     if(isAdmin){
-      await this.updateMemberPoints(member_id, points)
+      activity.approved_by = this.req.user.member_id,
+      activity.approved_at = new Date()
     }
     await this.activityRepository.save(activity);
+    await this.updateMemberPoints(member_id, points)
     return {
       message : isAdmin ? "امتیاز به کاربر تعلق گرفت." : "فعالیت ثبت و در انتظار تایید قرار گرفت."
     }
@@ -108,7 +111,7 @@ export class ActivityService {
         section_code: activity.section_code,
         approved_by: activity.approved_by,
         approver_fullName : `${activity.approver?.user?.first_name || ''} ${activity.approver?.user?.last_name || ''}`,
-        approved_at: activity.approved_at,
+        approved_at: activity.approved_at ? DateConvertor(activity.approved_at, false) : null,
         approval_notes: activity.approval_notes,
         created_at: DateConvertor(activity.created_at, false)
     }));
@@ -139,7 +142,7 @@ export class ActivityService {
       section_code: activity.section_code,
       approved_by: activity.approved_by,
       approver_fullName : `${activity.approver?.user?.first_name || ''} ${activity.approver?.user?.last_name || ''}`,
-      approved_at: activity.approved_at,
+      approved_at: activity.approved_at ? DateConvertor(activity.approved_at, false) : null,
       approval_notes: activity.approval_notes,
       created_at: DateConvertor(activity.created_at, false)
     };
