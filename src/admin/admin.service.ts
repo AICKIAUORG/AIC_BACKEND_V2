@@ -103,7 +103,7 @@ export class AdminService {
       throw new ConflictException('این بخش دارای مدیر میباشد.')
 
     if(code > 300 && code < 400){
-      const department = await this.departmentRepository.findOneBy({ role_code : code })
+      const department = await this.departmentRepository.findOneBy({ code })
       if(!department)
         throw new NotFoundException('دپارتمان یافت نشد')
       if(member.department_id && member.department_id === department.id){
@@ -130,19 +130,20 @@ export class AdminService {
       message : code < 200 ? `اکنون کاربر عضو هییت مدیره با سمت ${admin.role} میباشد` : `اکنون کاربر مدیر ${admin.role} میباشد`
     }
   }
-  
+
   async checkAccess(id: number, role : Number[], permission : Number[]) {
-    const member_role = await this.adminRepository.findOneBy({member_id : id})
+    let { code } = await this.adminRepository.findOneBy({member_id : id})
+    code = +code;
     const member_permissions = await this.permissionRepository.findOne({
       relations : {members : true},
       where : {
         members : {id}
     }})
     if(permission.length > 0 && permission.includes(member_permissions?.code)) return true
-    if(100 < member_role?.code && member_role?.code < 200 && role.includes(100)) return true
-    if(200 < member_role?.code && member_role?.code < 300 && role.includes(200)) return true
-    if(300 < member_role?.code && member_role?.code < 400 && role.includes(300)) return true
-    if(role.includes(member_role?.code)) return true
+    if(100 < code && code < 200 && role.includes(100)) return true
+    if(200 < code && code < 300 && role.includes(200)) return true
+    if(300 < code && code < 400 && role.includes(300)) return true
+    if(role.includes(code)) return true
     return false
   }
 
