@@ -21,9 +21,6 @@ export class AdminService {
     @InjectRepository(PermissionEntity) 
     private permissionRepository : Repository<PermissionEntity>
   ){}
-  create(createAdminDto: CreateAdminDto) {
-    return 'This action adds a new admin';
-  }
 
   async findAll() {
     const admins = await this.adminRepository.find({
@@ -33,7 +30,7 @@ export class AdminService {
       .map(admin => {
         return {
           code: admin.code,
-          name: admin.role,
+          role: admin.role,
           head_name: admin.member_id
             ? `${admin?.member?.user?.first_name} ${admin?.member?.user?.last_name}`
             : "مشخص نشده",
@@ -133,23 +130,19 @@ export class AdminService {
       message : code < 200 ? `اکنون کاربر عضو هییت مدیره با سمت ${admin.role} میباشد` : `اکنون کاربر مدیر ${admin.role} میباشد`
     }
   }
-
-  remove(id: number) {
-    return `This action removes a #${id} admin`;
-  }
-
+  
   async checkAccess(id: number, role : Number[], permission : Number[]) {
-    const user_role = await this.adminRepository.findOneBy({member_id : id})
-    const user_permissions = await this.permissionRepository.findOne({
+    const member_role = await this.adminRepository.findOneBy({member_id : id})
+    const member_permissions = await this.permissionRepository.findOne({
       relations : {members : true},
       where : {
         members : {id}
     }})
-    if(permission.length > 0 && permission.includes(user_permissions?.code)) return true
-    if(100 < user_role?.code && user_role?.code < 200 && role.includes(100)) return true
-    if(200 < user_role?.code && user_role?.code < 300 && role.includes(200)) return true
-    if(300 < user_role?.code && user_role?.code < 400 && role.includes(300)) return true
-    if(role.includes(user_role?.code)) return true
+    if(permission.length > 0 && permission.includes(member_permissions?.code)) return true
+    if(100 < member_role?.code && member_role?.code < 200 && role.includes(100)) return true
+    if(200 < member_role?.code && member_role?.code < 300 && role.includes(200)) return true
+    if(300 < member_role?.code && member_role?.code < 400 && role.includes(300)) return true
+    if(role.includes(member_role?.code)) return true
     return false
   }
 
