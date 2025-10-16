@@ -35,7 +35,7 @@ export class DepartmentsService {
     if(await this.departmentRepository.findOne({
       where : [
         {name},
-        {role_code : code}
+        {code}
       ]
     })){
       throw new ConflictException('این شناسه وجود دارد.')
@@ -48,7 +48,7 @@ export class DepartmentsService {
     const commission = this.departmentRepository.create({
       name,
       commission_id : +commission_id,
-      role_code
+      code : role_code
     })
     await this.departmentRepository.save(commission)
     return {
@@ -116,7 +116,7 @@ export class DepartmentsService {
 
     department.name = new_name
     await this.departmentRepository.save(department)
-    await this.adminRepository.update({code : department.role_code}, {
+    await this.adminRepository.update({code : department.code}, {
       role : new_name
     })
     return {
@@ -155,7 +155,7 @@ export class DepartmentsService {
     if(admin.code > 100 && admin.code < 200){
       access = true
     }else if(admin.code > 200 && admin.code < 400){
-      if(department.role_code == admin.code || department.commission.role_code == admin.code){
+      if(department.code == admin.code || department.commission.code == admin.code){
         access = true
       }
     }
@@ -170,9 +170,9 @@ export class DepartmentsService {
   }
 
   async remove(id: number) {
-    const { role_code } = await this.checkExist(id)
+    const { code } = await this.checkExist(id)
     await this.departmentRepository.delete({id})
-    await this.adminRepository.delete({code : role_code})
+    await this.adminRepository.delete({code : code})
     return {
       message : "دپارتمان با موفقیت حذف شد"
     }

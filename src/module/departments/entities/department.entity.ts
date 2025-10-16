@@ -10,19 +10,19 @@ export class  DepartmentEntity {
     @Column()
     name :string
     @Column()
-    commission_id :number
+    commission_id: number
     @Column()
-    role_code : number
+    code : number
     @OneToOne(() => AdminEntity)
-    @JoinColumn({name : "role_code"})
+    @JoinColumn({name : "code"})
     role : AdminEntity
     @OneToMany(() => MemberEntity, (member) => member.department,{nullable: true})
     members : MemberEntity[]
     @ManyToOne(() => CommissionEntity, (commission) => commission.departments,{onDelete : "CASCADE"})
     @JoinColumn({name : "commission_id"})
-    commission : CommissionEntity
+    commission : CommissionEntity 
     @CreateDateColumn({type : "timestamptz"})
     created_at: Date;
     @UpdateDateColumn({type : "timestamptz"})
     updated_at: Date;
-}
+} 
