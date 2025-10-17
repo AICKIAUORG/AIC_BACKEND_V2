@@ -14,7 +14,7 @@ export class AdminController {
 
   @Get()
   @UserAuth()
-  @Access([101], [501])
+  @Access([100])
   @ApiOperation({
     summary: 'Get all admins',
     description: 'Returns list of all admins with their roles and assigned members'
