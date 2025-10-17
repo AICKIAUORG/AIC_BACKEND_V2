@@ -131,19 +131,104 @@ export class AdminService {
     }
   }
 
-  async checkAccess(id: number, role : Number[], permission : Number[]) {
-    let { code } = await this.adminRepository.findOneBy({member_id : id})
-    code = +code;
-    const member_permissions = await this.permissionRepository.findOne({
-      relations : {members : true},
+  async addPermission(code : number, member_id : number){
+    const permission = await this.permissionRepository.findOneBy({ code })
+    const member = await this.memberRepository.findOne({ 
       where : {
-        members : {id}
-    }})
-    if(permission.length > 0 && permission.includes(member_permissions?.code)) return true
-    if(100 < code && code < 200 && role.includes(100)) return true
-    if(200 < code && code < 300 && role.includes(200)) return true
-    if(300 < code && code < 400 && role.includes(300)) return true
-    if(role.includes(code)) return true
+        id : member_id 
+      },
+      relations : ['permissions']
+    })
+    if(!permission)
+      throw new NotFoundException('نتیجه ای یافت نشد')
+
+    if(!member)
+      throw new NotFoundException('کاربر یافت نشد')
+    const hasPermission = member.permissions?.some(p => p.code === code)
+    if(hasPermission) {
+      throw new ConflictException('این دسترسی قبلاً به کاربر داده شده است')
+    }
+
+    const updatedPermissions = member.permissions ? [...member.permissions, permission] : [permission]
+    
+    member.permissions = updatedPermissions;
+    await this.memberRepository.save(member);
+    return {
+      message : `دسترسی ${permission.permission} به کاربر اضافه شد`
+    }
+  }
+
+  async removePermission(code : number, member_id : number){
+    const permission = await this.permissionRepository.findOneBy({ code })
+    const member = await this.memberRepository.findOne({ 
+      where : {
+        id : member_id 
+      },
+      relations : ['permissions']
+    })
+    if(!permission)
+      throw new NotFoundException('نتیجه ای یافت نشد')
+
+    if(!member)
+      throw new NotFoundException('کاربر یافت نشد')
+
+    const hasPermission = member.permissions?.some(p => p.code === code)
+    if(!hasPermission) {
+      throw new NotFoundException('این دسترسی به کاربر داده نشده است')
+    }
+
+    const updatedPermissions = member.permissions.filter(p => p.code !== code)
+    
+    await this.memberRepository.update({ id : member_id }, {
+      permissions : updatedPermissions
+    })
+    return {
+      message : `دسترسی ${permission.permission} از کاربر کرفته شد`
+    }
+  }
+
+  async getUserPermissions(member_id: number) {
+    const member = await this.memberRepository.findOne({ 
+      where : {
+        id : member_id 
+      },
+      relations : ['permissions']
+    })
+    
+    if(!member)
+      throw new NotFoundException('کاربر یافت نشد')
+
+    return {
+      member_id: member.id,
+      permissions: member.permissions?.map(p => ({
+        code: p.code,
+        permission: p.permission,
+        access: p.access
+      })) || []
+    }
+  }
+
+  async checkAccess(member_id: number, role : Number[], permission : Number[]) {
+    const member = await this.memberRepository.findOne({
+      where: { id : member_id },
+      relations: ['permissions']
+    });
+    if(!member)
+      throw new NotFoundException("کاربر یافت نشد.")
+
+    if(permission.length > 0 && member?.permissions) {
+      const memberPermissionCodes = member.permissions.map(p => p.code);
+      const hasRequiredPermission = permission.some(p => memberPermissionCodes.includes(+p));
+      if(hasRequiredPermission) return true;
+    }
+    const admin = await this.adminRepository.findOneBy({ member_id })
+    if(admin && admin?.code){
+      const code = +admin.code;
+      if(100 < code && code < 200 && role.includes(100)) return true
+      if(200 < code && code < 300 && role.includes(200)) return true
+      if(300 < code && code < 400 && role.includes(300)) return true
+      if(role.includes(code)) return true
+    }
     return false
   }
 
